@@ -1,0 +1,6 @@
+getAllUsers
+createUser
+getUserById
+updateUser
+patchUser
+deleteUser
