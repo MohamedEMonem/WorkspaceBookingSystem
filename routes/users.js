@@ -20,8 +20,8 @@ router.post("/login", loginUser);
 // POST /users/logout - Log out a user
 router.post("/logout", logoutUser);
 
-// POST /users - Create a new user
-router.post("/", createUser);
+// POST /users/signup - Create a new user
+router.post("/signup", createUser);
 
 // GET /users/:id - Get a single user by ID
 router.get("/:id", getUserById);

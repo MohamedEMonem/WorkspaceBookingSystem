@@ -78,10 +78,10 @@ const createUser = async (req, res) => {
       return res
         .status(400)
         .json({ error: "Gender must be at least 4 characters" });
-    } else if ((role === "admin" && role !== "owner") || role !== "user") {
+    } else if ((role === "admin")) {
       return res
         .status(400)
-        .json({ error: "Role must be either 'admin', 'owner', or 'user'" });
+        .json({ error: "Role must be either 'owner', or 'user'" });
     } else {
       // Hash the password
       const saltRounds = 10;
@@ -152,19 +152,195 @@ const getUserById = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-    // Logic to update user
-    res.status(200).json({ message: "User updated successfully" });
+    const { token } = req.headers;
+    // Validate token
+    if (!token) {
+      return res.status(401).json({ error: "Token is required" });
+    }
+
+    // Check if user with this token exists
+    const userWithToken = await UserModel.findOne({ token });
+    if (!userWithToken) {
+      return res.status(401).json({ error: "Invalid or expired token" });
+    }
+
+    // Check if user is trying to update themselves or if they are admin
+    if (userWithToken._id.toString() === req.params.id) {
+      // User updating their own profile
+      const { name, phone, gender, birthday, password } = req.body;
+      
+      let updateData = {};
+      if (name) updateData.name = name;
+      if (phone) updateData.phone = phone;
+      if (gender) updateData.gender = gender;
+      if (birthday) updateData.birthday = birthday;
+      
+      // Hash password if provided
+      if (password) {
+        const saltRounds = 10;
+        updateData.password = await bcrypt.hash(password, saltRounds);
+      }
+
+      const updatedUser = await UserModel.findByIdAndUpdate(
+        userWithToken._id,
+        updateData,
+        { new: true }
+      );
+      
+      res.status(200).json({
+        message: "User updated successfully",
+        user: {
+          id: updatedUser._id,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          phone: updatedUser.phone,
+          gender: updatedUser.gender,
+          birthday: updatedUser.birthday,
+          role: updatedUser.role,
+        },
+      });
+    } else if (userWithToken.role === "admin") {
+      // Admin updating another user
+      const userToUpdate = await UserModel.findById(req.params.id);
+      if (!userToUpdate) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const { name, phone, gender, birthday, role, password } = req.body;
+      
+      let updateData = {};
+      if (name) updateData.name = name;
+      if (phone) updateData.phone = phone;
+      if (gender) updateData.gender = gender;
+      if (birthday) updateData.birthday = birthday;
+      if (role) updateData.role = role;
+      
+      // Hash password if provided
+      if (password) {
+        const saltRounds = 10;
+        updateData.password = await bcrypt.hash(password, saltRounds);
+      }
+
+      const updatedUser = await UserModel.findByIdAndUpdate(
+        req.params.id,
+        updateData,
+        { new: true }
+      );
+      
+      res.status(200).json({
+        message: "User updated successfully",
+        user: {
+          id: updatedUser._id,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          phone: updatedUser.phone,
+          gender: updatedUser.gender,
+          birthday: updatedUser.birthday,
+          role: updatedUser.role,
+        },
+      });
+    } else {
+      // Not admin and not updating own account
+      return res.status(403).json({ error: "Access denied" });
+    }
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: "Error updating user", message: error.message });
   }
 };
 
 const patchUser = async (req, res) => {
   try {
-    // Logic to partially update user
-    res.status(200).json({ message: "User patched successfully" });
+    const { token } = req.headers;
+    // Validate token
+    if (!token) {
+      return res.status(401).json({ error: "Token is required" });
+    }
+
+    // Check if user with this token exists
+    const userWithToken = await UserModel.findOne({ token });
+    if (!userWithToken) {
+      return res.status(401).json({ error: "Invalid or expired token" });
+    }
+
+    // Check if user is trying to patch themselves or if they are admin
+    if (userWithToken._id.toString() === req.params.id) {
+      // User patching their own profile (only specific fields allowed)
+      const { name, phone, gender, birthday } = req.body;
+      
+      let updateData = {};
+      if (name) updateData.name = name;
+      if (phone) updateData.phone = phone;
+      if (gender) updateData.gender = gender;
+      if (birthday) updateData.birthday = birthday;
+
+      // Check if there's anything to update
+      if (Object.keys(updateData).length === 0) {
+        return res.status(400).json({ error: "No valid fields provided for update" });
+      }
+
+      const patchedUser = await UserModel.findByIdAndUpdate(
+        userWithToken._id,
+        { $set: updateData },
+        { new: true }
+      );
+      
+      res.status(200).json({
+        message: "User patched successfully",
+        user: {
+          id: patchedUser._id,
+          name: patchedUser.name,
+          email: patchedUser.email,
+          phone: patchedUser.phone,
+          gender: patchedUser.gender,
+          birthday: patchedUser.birthday,
+          role: patchedUser.role,
+        },
+      });
+    } else if (userWithToken.role === "admin") {
+      // Admin patching another user
+      const userToPatch = await UserModel.findById(req.params.id);
+      if (!userToPatch) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const { name, phone, gender, birthday, role } = req.body;
+      
+      let updateData = {};
+      if (name) updateData.name = name;
+      if (phone) updateData.phone = phone;
+      if (gender) updateData.gender = gender;
+      if (birthday) updateData.birthday = birthday;
+      if (role) updateData.role = role;
+
+      // Check if there's anything to update
+      if (Object.keys(updateData).length === 0) {
+        return res.status(400).json({ error: "No valid fields provided for update" });
+      }
+
+      const patchedUser = await UserModel.findByIdAndUpdate(
+        req.params.id,
+        { $set: updateData },
+        { new: true }
+      );
+      
+      res.status(200).json({
+        message: "User patched successfully",
+        user: {
+          id: patchedUser._id,
+          name: patchedUser.name,
+          email: patchedUser.email,
+          phone: patchedUser.phone,
+          gender: patchedUser.gender,
+          birthday: patchedUser.birthday,
+          role: patchedUser.role,
+        },
+      });
+    } else {
+      // Not admin and not patching own account
+      return res.status(403).json({ error: "Access denied" });
+    }
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: "Error patching user", message: error.message });
   }
 };
 
