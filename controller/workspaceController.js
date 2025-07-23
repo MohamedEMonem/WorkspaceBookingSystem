@@ -115,11 +115,77 @@ const deleteWorkspaces = async (req, res) => {
   }
 };
 
+// Custom GET for solutions logic
+const getWorkspaceSolutions = async (req, res) => {
+  try {
+    const workspaces = await workspacesModel.find();
+
+    // Prepare groups
+    const privateWorkspace = [];
+    const coworkingAccess = [];
+    const additionalSolutions = [];
+
+    workspaces.forEach(ws => {
+      const { name, location, description, solution = {}, _id } = ws;
+      // Group privateWorkspace
+      if (solution.privateWorkspace && solution.privateWorkspace.length > 0) {
+        solution.privateWorkspace.forEach(type => {
+          privateWorkspace.push({
+            workspaceId: _id,
+            name,
+            type,
+            location,
+            description
+          });
+        });
+      }
+      // Group coworkingAccess (if present in schema)
+      if (solution.coworkingAccess && solution.coworkingAccess.length > 0) {
+        solution.coworkingAccess.forEach(type => {
+          coworkingAccess.push({
+            workspaceId: _id,
+            name,
+            type,
+            location,
+            description
+          });
+        });
+      }
+      // Group additionalSolutions
+      if (solution.additionalSolutions && solution.additionalSolutions.length > 0) {
+        solution.additionalSolutions.forEach(type => {
+          additionalSolutions.push({
+            workspaceId: _id,
+            name,
+            type,
+            location,
+            description
+          });
+        });
+      }
+    });
+
+    // Only include coworkingAccess if it is used
+    const response = {
+      privateWorkspace,
+      additionalSolutions
+    };
+    if (coworkingAccess.length > 0) {
+      response.coworkingAccess = coworkingAccess;
+    }
+
+    res.json(response);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 module.exports = {
   getAllWorkspaces,
   createWorkspaces,
   getWorkspacesById,
   updateWorkspaces,
   patchWorkspaces,
-  deleteWorkspaces
+  deleteWorkspaces,
+  getWorkspaceSolutions
 };
