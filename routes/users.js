@@ -6,11 +6,15 @@ const {
   getUserById,
   updateUser,
   patchUser,
-  deleteUser
+  deleteUser,
+  loginUser
 } = require("../controller/userController");
 
 // GET /users - Get all users
 router.get("/", getAllUsers);
+
+// POST /users/login - Log in a user
+router.post("/login", loginUser);
 
 // POST /users - Create a new user
 router.post("/", createUser);
