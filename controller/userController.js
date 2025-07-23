@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+/** @type {import("mongoose").Model<any>} */
 const UserModel = require("../models/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -103,16 +104,11 @@ const createUser = async (req, res) => {
 const getUserById = async (req, res) => {
   try {
     // Logic to get user by ID
-    User.findById(req.params.id)
-      .then((user) => {
-        if (!user) {
-          return res.status(404).json({ error: "User not found" });
-        }
-        res.status(200).json(user);
-      })
-      .catch((error) => {
-        res.status(500).json({ error: "Error fetching user" });
-      });
+    const user = await UserModel.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ error: "Error fetching user" });
   }
@@ -148,18 +144,21 @@ const deleteUser = async (req, res) => {
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-
+    
     // Validate required fields
     if (!email || !password) {
       return res.status(400).json({ error: "Email and password are required" });
-    }
+    };
 
     // Find user by email
-    const user = await User.findOne({ email });
+    console.log("Looking for user with email:", email);
+    const user = await UserModel.findOne({ email });
+    console.log("User found:", user ? "Yes" : "No");
+    
     if (!user) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
-
+    
     // Compare password with hashed password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
@@ -176,7 +175,7 @@ const loginUser = async (req, res) => {
       email + Date.now(),
       { expiresIn: "5D" }
     );
-
+    await UserModel.updateOne({ _id: user._id }, { $set: { token: token } });
     res.status(200).json({
       message: "User logged in successfully",
       token: token,
@@ -188,6 +187,7 @@ const loginUser = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("Login error:", error);
     res.status(500).json({ error: error.message });
   }
 };
