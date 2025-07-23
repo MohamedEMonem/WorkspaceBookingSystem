@@ -2,12 +2,13 @@
 const express = require("express");
 const app = express();
 app.use(express.json());
-const todosRoutes = require("./routes/users");
+const usersRoutes = require("./routes/users");
 
 //mongoose
 const mongoose = require("mongoose");
 
-app.get("/users", users);
+// Use the users routes
+app.use("/users", usersRoutes);
 
 mongoose
   .connect(
