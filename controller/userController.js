@@ -6,11 +6,28 @@ const app = express();
 
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const e = require("express");
 
 const getAllUsers = async (req, res) => {
   try {
-    const users = await UserModel.find({});
-    res.status(200).json(users);
+    const { token } = req.headers;
+
+    // Validate token
+    if (!token) {
+      return res.status(401).json({ error: "Token is required" });
+    }
+
+    // Check if user with this token exists
+    const userWithToken = await UserModel.findOne({ token });
+    if (!userWithToken) {
+      return res.status(401).json({ error: "Invalid or expired token" });
+    }
+    if (userWithToken.role !== "admin") {
+      return res.status(403).json({ error: "Access denied" });
+    } else {
+      const users = await UserModel.find({});
+      res.status(200).json(users);
+    }
   } catch (error) {
     res.status(500).json({ error: "Error fetching users" });
   }
@@ -18,7 +35,7 @@ const getAllUsers = async (req, res) => {
 
 const createUser = async (req, res) => {
   try {
-    const { email,name,phone,gender,birthday,role,password } = req.body;
+    const { email, name, phone, gender, birthday, role, password } = req.body;
     // Check if user already exists
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
@@ -105,12 +122,29 @@ const createUser = async (req, res) => {
 
 const getUserById = async (req, res) => {
   try {
-    // Logic to get user by ID
-    const user = await UserModel.findById(req.params.id);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
+    const { token } = req.headers;
+    // Validate token
+    if (!token) {
+      return res.status(401).json({ error: "Token is required" });
     }
-    res.status(200).json(user);
+
+    // Check if user with this token exists
+    const userWithToken = await UserModel.findOne({ token });
+    if (!userWithToken) {
+      return res.status(401).json({ error: "Invalid or expired token" });
+    }
+    if (userWithToken.id === req.params.id) {
+      const user = await UserModel.findById(userWithToken._id);
+      res.status(200).json(user);
+    } else if (userWithToken.role === "admin") {
+      const user = await UserModel.findById(req.params.id);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.status(200).json(user);
+    } else if (userWithToken.role !== "admin") {
+      return res.status(403).json({ message: "Access denied" });
+    }
   } catch (error) {
     res.status(500).json({ error: "Error fetching user" });
   }
@@ -136,31 +170,57 @@ const patchUser = async (req, res) => {
 
 const deleteUser = async (req, res) => {
   try {
-    // Logic to delete user
-    res.status(200).json({ message: "User deleted successfully" });
+    const { token } = req.headers;
+    // Validate token
+    if (!token) {
+      return res.status(401).json({ error: "Token is required" });
+    }
+
+    // Check if user with this token exists
+    const userWithToken = await UserModel.findOne({ token });
+    if (!userWithToken) {
+      return res.status(401).json({ error: "Invalid or expired token" });
+    }
+    
+    // Check if user is trying to delete themselves
+    if (userWithToken._id.toString() === req.params.id) {
+      await UserModel.findByIdAndDelete(userWithToken._id);
+      res.status(200).json({ message: "User deleted successfully" });
+    } else if (userWithToken.role === "admin") {
+      // Admin can delete other users
+      const userToDelete = await UserModel.findById(req.params.id);
+      if (!userToDelete) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      await UserModel.findByIdAndDelete(req.params.id);
+      res.status(200).json({ message: "User deleted successfully" });
+    } else {
+      // Not admin and not deleting own account
+      return res.status(403).json({ error: "Access denied" });
+    }
   } catch (error) {
-    res.status(500).json({ error: "Error deleting user" });
+    res.status(500).json({ error: "Error deleting user", message: error.message });
   }
 };
 
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    
+
     // Validate required fields
     if (!email || !password) {
       return res.status(400).json({ error: "Email and password are required" });
-    };
+    }
 
     // Find user by email
     console.log("Looking for user with email:", email);
     const user = await UserModel.findOne({ email });
     console.log("User found:", user ? "Yes" : "No");
-    
+
     if (!user) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
-    
+
     // Compare password with hashed password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
@@ -194,6 +254,30 @@ const loginUser = async (req, res) => {
   }
 };
 
+const logoutUser = async (req, res) => {
+  try{
+    const { token } = req.headers;
+
+    // Validate token
+    if (!token) {
+      return res.status(401).json({ error: "Token is required" });
+    }
+
+    // Check if user with this token exists
+    const userWithToken = await UserModel.findOne({ token });
+    if (!userWithToken) {
+      return res.status(401).json({ error: "Invalid or expired token" });
+    }
+
+    // Clear the token from the user's record
+    await UserModel.updateOne({ _id: userWithToken._id }, { $set: { token: null } });
+
+    res.status(200).json({ message: "User logged out successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Error logging out user", message: error.message });
+  }
+};
+
 module.exports = {
   getAllUsers,
   createUser,
@@ -202,4 +286,5 @@ module.exports = {
   patchUser,
   deleteUser,
   loginUser,
+  logoutUser
 };
