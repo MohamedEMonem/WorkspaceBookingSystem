@@ -1,7 +1,9 @@
+/** @type {import("mongoose").Model<any>} */
+const UserModel = require("../models/userModel");
 const express = require("express");
 const app = express();
 /** @type {import("mongoose").Model<any>} */
-const UserModel = require("../models/userModel");
+
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
