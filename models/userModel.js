@@ -1,27 +1,26 @@
-const mongoose = require("mongoose")
-const usersSchema=mongoose.Schema({
-    _id,
-  name:{
+const mongoose = require("mongoose");
+
+const usersSchema = mongoose.Schema({
+  name: {
     type: String,
     minlength: [3, 'Name of users must be at least 3 characters'],
-    required:true,
-    trim:true,
+    required: true,
+    trim: true,
   },
   history: [],
   authorization: {
-    isSuperuser: {type:Boolean,default:False},
     role: {
-        enum:["admin","owner","normal_user"],
-        default:"normal_user"
+      type: String,
+      enum: ["admin", "owner", "user"],
+      default: "user"
     }
   },
-  email:String,
+  email: String,
   phone: String,
   gender: String,
   birthday: String
+});
 
-})
+const mongooseModel = mongoose.model("User", usersSchema);
 
-let mongooseModel= mongoose.model("Users",usersSchema)
-
-module.exports=mongooseModel
+module.exports = mongooseModel;
