@@ -7,7 +7,8 @@ const {
   updateUser,
   patchUser,
   deleteUser,
-  loginUser
+  loginUser,
+  logoutUser
 } = require("../controller/userController");
 
 // GET /users - Get all users
@@ -15,6 +16,9 @@ router.get("/", getAllUsers);
 
 // POST /users/login - Log in a user
 router.post("/login", loginUser);
+
+// POST /users/logout - Log out a user
+router.post("/logout", logoutUser);
 
 // POST /users - Create a new user
 router.post("/", createUser);
