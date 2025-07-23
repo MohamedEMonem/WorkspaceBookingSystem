@@ -1,41 +1,57 @@
-const mongoose = require("mongoose")
-const workspacesSchema=mongoose.Schema({
+const mongoose = require("mongoose");
 
-  _id,
-  name:{
-    type:String,
-    minlength: [3, 'Name of workspaces must be at least 3 characters'],
-    required:true,
-    trim:true,
+const workspaceSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    minlength: [3, "Workspace name must be at least 3 characters"],
+    required: true,
+    trim: true,
   },
-  location: String,//"Cairo"
-  rating:String ,//"4.5",
-  capacity:Number,// "50",
-  description:String,// "A modern workspace in the heart of Cairo for startups and freelancers.",
+  location: {
+    type: String,
+    trim: true,
+  },
+  rating: {
+    type: String,
+    trim: true,
+  },
+  capacity: {
+    type: Number,
+  },
+  description: {
+    type: String,
+    trim: true,
+  },
   solution: {
-  enum:["privateWorkspace","additionalSolutions"],//"privateWorkspace": [
-   privateWorkspace:[] ,
-   additionalSolutions:[]                        //  "Dedicated Desk",                                             //]
+    privateWorkspace: {
+      type: [String],
+      default: [],
+    },
+    additionalSolutions: {
+      type: [String],
+      default: [],
+    },
   },
   phone: {
     type: String,
-    minlength: [3, 'Name of users must be at least 3 characters'],
+    minlength: [3, "Phone number must be at least 3 characters"],
     required: true,
     trim: true,
   },
-  workinghours:{
+  workinghours: {
     type: String,
-    minlength: [3, 'Name of users must be at least 3 characters'],
+    minlength: [3, "Working hours must be at least 3 characters"],
     required: true,
     trim: true,
-  },// ,"9:00 AM - 9:00 PM",
-  workingdays:{
+  },
+  workingdays: {
     type: String,
-    minlength: [3, 'Name of users must be at least 3 characters'],
+    minlength: [3, "Working days must be at least 3 characters"],
     required: true,
     trim: true,
-  },// ,"Sunday - Thursday"
-})
+  },
+});
 
-let mongooseModel= mongoose.model("Users",workspacesSchema)
-module.exports=mongooseModel
+// Export the model
+const workspacesModel = mongoose.model("Workspace", workspaceSchema);
+module.exports = workspacesModel;
