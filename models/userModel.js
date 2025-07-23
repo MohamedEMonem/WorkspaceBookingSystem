@@ -3,7 +3,7 @@ const usersSchema=mongoose.Schema({
     _id,
   name:{
     type: String,
-    minlength: [3, 'Title must be at least 3 characters'],
+    minlength: [3, 'Name of users must be at least 3 characters'],
     required:true,
     trim:true,
   },
