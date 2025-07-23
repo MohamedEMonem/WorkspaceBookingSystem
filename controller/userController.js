@@ -15,13 +15,7 @@ const getAllUsers = async (req, res) => {
 
 const createUser = async (req, res) => {
   try {
-    const { email } = req.body;
-    const { name } = req.body;
-    const { phone } = req.body;
-    const { gender } = req.body;
-    const { birthday } = req.body;
-    const { role } = req.body;
-    const { password } = req.body;
+    const { email,name,phone,gender,birthday,role,password } = req.body;
     // Check if user already exists
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
