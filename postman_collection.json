@@ -39,6 +39,16 @@
       "key": "admin_id",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "user2_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user2_token",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -57,6 +67,14 @@
                   "    pm.collectionVariables.set('admin_token', response.token);",
                   "    pm.collectionVariables.set('admin_id', response.user.id);",
                   "    console.log('Admin token saved:', response.token);",
+                  "    pm.test('Admin user created successfully', function () {",
+                  "        pm.response.to.have.status(201);",
+                  "        pm.expect(response.user.role).to.eql('admin');",
+                  "    });",
+                  "} else {",
+                  "    pm.test('Admin creation failed as expected', function () {",
+                  "        pm.response.to.have.status(400);",
+                  "    });",
                   "}"
                 ]
               }
@@ -93,6 +111,10 @@
                   "    pm.collectionVariables.set('jwt_token', response.token);",
                   "    pm.collectionVariables.set('user_id', response.user.id);",
                   "    console.log('User token saved:', response.token);",
+                  "    pm.test('Regular user created successfully', function () {",
+                  "        pm.response.to.have.status(201);",
+                  "        pm.expect(response.user.role).to.eql('user');",
+                  "    });",
                   "}"
                 ]
               }
@@ -118,7 +140,47 @@
           }
         },
         {
-          "name": "1.3 Login Admin",
+          "name": "1.3 Sign Up Second User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('user2_token', response.token);",
+                  "    pm.collectionVariables.set('user2_id', response.user.id);",
+                  "    console.log('User2 token saved:', response.token);",
+                  "    pm.test('Second user created successfully', function () {",
+                  "        pm.response.to.have.status(201);",
+                  "        pm.expect(response.user.role).to.eql('user');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Smith\",\n  \"email\": \"jane@test.com\",\n  \"phone\": \"01234567890\",\n  \"gender\": \"female\",\n  \"birthday\": \"1992-03-20\",\n  \"role\": \"user\",\n  \"password\": \"jane123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/signup",
+              "host": ["{{base_url}}"],
+              "path": ["users", "signup"]
+            }
+          }
+        },
+        {
+          "name": "1.4 Login Admin",
           "event": [
             {
               "listen": "test",
@@ -128,6 +190,10 @@
                   "    const response = pm.response.json();",
                   "    pm.collectionVariables.set('admin_token', response.token);",
                   "    console.log('Admin logged in, token updated');",
+                  "    pm.test('Admin login successful', function () {",
+                  "        pm.response.to.have.status(200);",
+                  "        pm.expect(response.token).to.not.be.empty;",
+                  "    });",
                   "}"
                 ]
               }
@@ -153,7 +219,7 @@
           }
         },
         {
-          "name": "1.4 Login Regular User",
+          "name": "1.5 Login Regular User",
           "event": [
             {
               "listen": "test",
@@ -163,6 +229,10 @@
                   "    const response = pm.response.json();",
                   "    pm.collectionVariables.set('jwt_token', response.token);",
                   "    console.log('User logged in, token updated');",
+                  "    pm.test('User login successful', function () {",
+                  "        pm.response.to.have.status(200);",
+                  "        pm.expect(response.token).to.not.be.empty;",
+                  "    });",
                   "}"
                 ]
               }
@@ -190,10 +260,25 @@
       ]
     },
     {
-      "name": "2. User Profile",
+      "name": "2. User Profile Management",
       "item": [
         {
           "name": "2.1 Get Current User (Me)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Get current user successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.user).to.have.property('id');",
+                  "    pm.expect(response.user).to.have.property('role');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -216,6 +301,20 @@
         },
         {
           "name": "2.2 Get User by ID (Self)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Get user by ID successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.user).to.have.property('_id');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -238,6 +337,20 @@
         },
         {
           "name": "2.3 Update User Profile (PUT)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Update user profile successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.user.name).to.eql('John Updated');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -269,6 +382,20 @@
         },
         {
           "name": "2.4 Update User Profile (PATCH)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Patch user profile successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.user.name).to.eql('John Patched');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -305,6 +432,21 @@
       "item": [
         {
           "name": "3.1 Get All Users (Admin Only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Admin can get all users', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.users).to.be.an('array');",
+                  "    pm.expect(response.count).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -327,6 +469,20 @@
         },
         {
           "name": "3.2 Get Any User by ID (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Admin can get any user by ID', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.user).to.have.property('_id');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -349,6 +505,20 @@
         },
         {
           "name": "3.3 Update User Role (Admin Only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Admin can update user role', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.user.role).to.eql('owner');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -377,28 +547,6 @@
               "path": ["users", "{{user_id}}"]
             }
           }
-        },
-        {
-          "name": "3.4 Delete User (Admin)",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{admin_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/users/{{user_id}}",
-              "host": ["{{base_url}}"],
-              "path": ["users", "{{user_id}}"]
-            }
-          }
         }
       ]
     },
@@ -406,29 +554,21 @@
       "name": "4. Token Management",
       "item": [
         {
-          "name": "4.1 Validate Current Token",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{jwt_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/users/validate-token",
-              "host": ["{{base_url}}"],
-              "path": ["users", "validate-token"]
+          "name": "4.1 Logout (Blacklist Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Logout successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.message).to.include('logged out');",
+                  "});"
+                ]
+              }
             }
-          }
-        },
-        {
-          "name": "4.2 Logout (Blacklist Token)",
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -450,14 +590,28 @@
           }
         },
         {
-          "name": "4.3 Logout All Devices (Self)",
+          "name": "4.2 Logout All Devices (Self)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Logout all devices successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.message).to.include('devices');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{jwt_token}}",
+                  "value": "{{user2_token}}",
                   "type": "string"
                 }
               ]
@@ -472,7 +626,21 @@
           }
         },
         {
-          "name": "4.4 Logout All Devices for User (Admin)",
+          "name": "4.3 Logout All Devices for User (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Admin can logout user from all devices', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.message).to.include('devices');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -487,9 +655,9 @@
             "method": "POST",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/users/logout-all/{{user_id}}",
+              "raw": "{{base_url}}/users/logout-all/{{user2_id}}",
               "host": ["{{base_url}}"],
-              "path": ["users", "logout-all", "{{user_id}}"]
+              "path": ["users", "logout-all", "{{user2_id}}"]
             }
           }
         }
@@ -500,6 +668,20 @@
       "item": [
         {
           "name": "5.1 Get Token Statistics (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Admin can get token statistics', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.stats).to.be.an('object');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -522,6 +704,20 @@
         },
         {
           "name": "5.2 Cleanup Expired Tokens (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Admin can cleanup expired tokens', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.deletedCount).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -545,17 +741,31 @@
       ]
     },
     {
-      "name": "6. Error Testing",
+      "name": "6. Authorization Testing",
       "item": [
         {
-          "name": "6.1 Access Admin Endpoint as User (Should Fail)",
+          "name": "6.1 User Access Admin Endpoint (Should Fail)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('User cannot access admin endpoint', function () {",
+                  "    pm.response.to.have.status(403);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.error).to.include('Access denied');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{jwt_token}}",
+                  "value": "{{user2_token}}",
                   "type": "string"
                 }
               ]
@@ -571,6 +781,20 @@
         },
         {
           "name": "6.2 Access with No Token (Should Fail)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('No token access denied', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.error).to.include('token');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -583,6 +807,20 @@
         },
         {
           "name": "6.3 Access with Invalid Token (Should Fail)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Invalid token access denied', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.error).to.include('Invalid token');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -605,13 +843,27 @@
         },
         {
           "name": "6.4 Access Other User's Data (Should Fail)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('User cannot access other user data', function () {",
+                  "    pm.response.to.have.status(403);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.error).to.include('Access denied');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{jwt_token}}",
+                  "value": "{{user2_token}}",
                   "type": "string"
                 }
               ]
@@ -626,14 +878,28 @@
           }
         },
         {
-          "name": "6.5 Try to Change Role as User (Should Fail)",
+          "name": "6.5 User Try to Change Role (Should Fail)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('User cannot change role', function () {",
+                  "    pm.response.to.have.status(403);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.error).to.include('admin');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{jwt_token}}",
+                  "value": "{{user2_token}}",
                   "type": "string"
                 }
               ]
@@ -650,9 +916,45 @@
               "raw": "{\n  \"role\": \"admin\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/users/{{user_id}}",
+              "raw": "{{base_url}}/users/{{user2_id}}",
               "host": ["{{base_url}}"],
-              "path": ["users", "{{user_id}}"]
+              "path": ["users", "{{user2_id}}"]
+            }
+          }
+        },
+        {
+          "name": "6.6 User Try Admin Logout All (Should Fail)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('User cannot logout others from all devices', function () {",
+                  "    pm.response.to.have.status(403);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.error).to.include('Admin required');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user2_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/logout-all/{{admin_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "logout-all", "{{admin_id}}"]
             }
           }
         }
@@ -670,6 +972,18 @@
                 "exec": [
                   "// This request should be run after logout to test blacklisted token",
                   "console.log('Testing blacklisted token:', pm.collectionVariables.get('jwt_token'));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Blacklisted token access denied', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.error).to.include('token');",
+                  "});"
                 ]
               }
             }
@@ -691,6 +1005,266 @@
               "raw": "{{base_url}}/users/me",
               "host": ["{{base_url}}"],
               "path": ["users", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. CRUD Operations Testing",
+      "item": [
+        {
+          "name": "8.1 Create Owner User (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('owner_id', response.user.id);",
+                  "    pm.test('Owner user created successfully', function () {",
+                  "        pm.response.to.have.status(201);",
+                  "        pm.expect(response.user.role).to.eql('owner');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Owner User\",\n  \"email\": \"owner@test.com\",\n  \"phone\": \"11111111111\",\n  \"gender\": \"female\",\n  \"birthday\": \"1988-12-25\",\n  \"role\": \"owner\",\n  \"password\": \"owner123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/signup",
+              "host": ["{{base_url}}"],
+              "path": ["users", "signup"]
+            }
+          }
+        },
+        {
+          "name": "8.2 Delete Owner User (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Admin can delete user', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.message).to.include('deleted');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/{{owner_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{owner_id}}"]
+            }
+          }
+        },
+        {
+          "name": "8.3 Try to Access Deleted User (Should Fail)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Deleted user not found', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.error).to.include('not found');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/{{owner_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{owner_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Validation Testing",
+      "item": [
+        {
+          "name": "9.1 Invalid Email Format (Should Fail)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Invalid email format rejected', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.error).to.include('email');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"invalid-email\",\n  \"phone\": \"12345678900\",\n  \"gender\": \"male\",\n  \"birthday\": \"1990-01-01\",\n  \"role\": \"user\",\n  \"password\": \"test123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/signup",
+              "host": ["{{base_url}}"],
+              "path": ["users", "signup"]
+            }
+          }
+        },
+        {
+          "name": "9.2 Short Password (Should Fail)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Short password rejected', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.error).to.include('6 characters');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"phone\": \"12345678900\",\n  \"gender\": \"male\",\n  \"birthday\": \"1990-01-01\",\n  \"role\": \"user\",\n  \"password\": \"123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/signup",
+              "host": ["{{base_url}}"],
+              "path": ["users", "signup"]
+            }
+          }
+        },
+        {
+          "name": "9.3 Invalid Phone Format (Should Fail)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Invalid phone format rejected', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.error).to.include('phone');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"test2@example.com\",\n  \"phone\": \"123\",\n  \"gender\": \"male\",\n  \"birthday\": \"1990-01-01\",\n  \"role\": \"user\",\n  \"password\": \"test123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/signup",
+              "host": ["{{base_url}}"],
+              "path": ["users", "signup"]
+            }
+          }
+        },
+        {
+          "name": "9.4 Duplicate Email (Should Fail)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Duplicate email rejected', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.error).to.include('already exists');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"admin@test.com\",\n  \"phone\": \"12345678909\",\n  \"gender\": \"male\",\n  \"birthday\": \"1990-01-01\",\n  \"role\": \"user\",\n  \"password\": \"test123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/signup",
+              "host": ["{{base_url}}"],
+              "path": ["users", "signup"]
             }
           }
         }
