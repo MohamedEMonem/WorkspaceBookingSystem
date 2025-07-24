@@ -1,6 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const { auth, authAdmin } = require("../middleware/auth");
+const { 
+  auth, 
+  authAdmin, 
+  authOwner, 
+  authAdminOrOwner, 
+  authUserAccess, 
+  authUserModify 
+} = require("../middleware/auth");
 const {
   getAllUsers,
   createUser,
@@ -14,15 +21,36 @@ const {
   getTokenStats,
   cleanupTokens,
   getCurrentUser,
+  adminInvite,
+  getSystemStats,
+  verifyInvite,
+  signupWithInvite,
 } = require("../controller/userController");
 
 // Public routes (no authentication required)
 router.post("/login", loginUser);
 router.post("/signup", createUser);
 
+// Invite-based routes (no authentication required for verification and signup)
+router.post("/verify-invite", verifyInvite);
+router.post("/signup-with-invite", signupWithInvite);
+
 // Protected routes requiring authentication
 // GET /users/me - Get current authenticated user info
 router.get("/me", auth, getCurrentUser);
+
+// User-specific routes with proper authorization
+// GET /users/:id - Get a single user by ID (user can access own data, admin can access any)
+router.get("/:id", auth, authUserAccess, getUserById);
+
+// PUT /users/:id - Update a user by ID (user can update own data, admin/owner can update any)
+router.put("/:id", auth, authUserModify, updateUser);
+
+// PATCH /users/:id - Partially update a user by ID (user can patch own data, admin/owner can patch any)
+router.patch("/:id", auth, authUserModify, patchUser);
+
+// DELETE /users/:id - Delete a user by ID (user can delete own account, admin/owner can delete any)
+router.delete("/:id", auth, authUserModify, deleteUser);
 
 // Token management routes
 // POST /users/logout - Log out current user (blacklist current token)
@@ -36,23 +64,16 @@ router.post("/logout-all/:id", auth, authAdmin, logoutAllDevices);
 // GET /users - Get all users (admin only)
 router.get("/", auth, authAdmin, getAllUsers);
 
+// GET /users/admin/stats - Get system statistics (admin only)
+router.get("/admin/stats", auth, authAdmin, getSystemStats);
+
 // GET /users/admin/token-stats - Get token blacklist statistics (admin only)
 router.get("/admin/token-stats", auth, authAdmin, getTokenStats);
 
 // POST /users/admin/cleanup-tokens - Clean up expired tokens (admin only)
 router.post("/admin/cleanup-tokens", auth, authAdmin, cleanupTokens);
 
-// User-specific routes (user can access own data, admin can access any)
-// GET /users/:id - Get a single user by ID
-router.get("/:id", auth, getUserById);
-
-// PUT /users/:id - Update a user by ID
-router.put("/:id", auth, updateUser);
-
-// PATCH /users/:id - Partially update a user by ID
-router.patch("/:id", auth, patchUser);
-
-// DELETE /users/:id - Delete a user by ID
-router.delete("/:id", auth, deleteUser);
+// POST /users/admin/invite - Create admin invite (admin only)
+router.post("/admin/invite", auth, authAdmin, adminInvite);
 
 module.exports = router;

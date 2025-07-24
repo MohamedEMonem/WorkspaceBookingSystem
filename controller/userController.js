@@ -1,6 +1,9 @@
 const { UserModel } = require("../models/userModel");
 const { TokenBlacklist } = require("../models/tokenBlacklistModel");
-const { getBlacklistStats, cleanupExpiredTokens } = require("../utils/tokenUtils");
+const {
+  getBlacklistStats,
+  cleanupExpiredTokens,
+} = require("../utils/tokenUtils");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -21,24 +24,29 @@ const getAllUsers = async (req, res) => {
   try {
     // Check if user is admin
     if (req.user.role !== "admin") {
-      return res.status(403).json({ error: "Access denied. Admin privileges required." });
+      return res
+        .status(403)
+        .json({ error: "Access denied. Admin privileges required." });
     }
 
-    const users = await UserModel.find({}).select('-password');
+    const users = await UserModel.find({}).select("-password");
     res.status(200).json({
       message: "Users retrieved successfully",
       users: users,
-      count: users.length
+      count: users.length,
     });
   } catch (error) {
-    res.status(500).json({ error: "Error fetching users", message: error.message });
+    res
+      .status(500)
+      .json({ error: "Error fetching users", message: error.message });
   }
 };
 
 const createUser = async (req, res) => {
   try {
-    const { email, name, phone, gender, birthday, role, password, adminKey } = req.body;
-    
+    const { email, name, phone, gender, birthday, role, password, adminKey } =
+      req.body;
+
     // Check if user already exists
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
@@ -52,7 +60,15 @@ const createUser = async (req, res) => {
     }
 
     // Validate required fields
-    if (!email || !name || !phone || !gender || !birthday || !role || !password) {
+    if (
+      !email ||
+      !name ||
+      !phone ||
+      !gender ||
+      !birthday ||
+      !role ||
+      !password
+    ) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
@@ -64,28 +80,36 @@ const createUser = async (req, res) => {
       return res.status(400).json({ error: "Invalid phone number format" });
     }
     if (password.length < 6) {
-      return res.status(400).json({ error: "Password must be at least 6 characters" });
+      return res
+        .status(400)
+        .json({ error: "Password must be at least 6 characters" });
     }
     if (name.length < 3) {
-      return res.status(400).json({ error: "Name must be at least 3 characters" });
+      return res
+        .status(400)
+        .json({ error: "Name must be at least 3 characters" });
     }
     if (gender.length < 4) {
-      return res.status(400).json({ error: "Gender must be at least 4 characters" });
+      return res
+        .status(400)
+        .json({ error: "Gender must be at least 4 characters" });
     }
     if (!["admin", "owner", "user"].includes(role)) {
-      return res.status(400).json({ error: "Role must be 'admin', 'owner', or 'user'" });
+      return res
+        .status(400)
+        .json({ error: "Role must be 'admin', 'owner', or 'user'" });
     }
 
     // Admin role protection: require ADMIN_KEY
     if (role === "admin") {
       if (!adminKey) {
-        return res.status(400).json({ 
-          error: "Admin key is required to create admin accounts" 
+        return res.status(400).json({
+          error: "Admin key is required to create admin accounts",
         });
       }
       if (adminKey !== process.env.ADMIN_KEY) {
-        return res.status(403).json({ 
-          error: "Invalid admin key. Access denied." 
+        return res.status(403).json({
+          error: "Invalid admin key. Access denied.",
         });
       }
     }
@@ -104,7 +128,7 @@ const createUser = async (req, res) => {
       role,
       password: hashedPassword,
     });
-    
+
     await newUser.save();
 
     // Create JWT token after user is created
@@ -133,51 +157,39 @@ const createUser = async (req, res) => {
 const getUserById = async (req, res) => {
   try {
     const requestedUserId = req.params.id;
-    const currentUserId = req.user.userId;
-    const currentUserRole = req.user.role;
-
-    // Check authorization: user can access their own data, admin can access any data
-    if (currentUserRole !== "admin" && requestedUserId !== currentUserId) {
-      return res.status(403).json({ 
-        error: "Access denied. You can only access your own profile." 
-      });
-    }
-
-    const user = await UserModel.findById(requestedUserId).select('-password');
+    
+    // Authorization is handled by authUserAccess middleware
+    const user = await UserModel.findById(requestedUserId).select("-password");
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
     res.status(200).json({
       message: "User retrieved successfully",
-      user: user
+      user: user,
     });
   } catch (error) {
-    res.status(500).json({ error: "Error fetching user", message: error.message });
+    res
+      .status(500)
+      .json({ error: "Error fetching user", message: error.message });
   }
 };
 
-// PUT /users/:id - User can update their own data, admin can update any user data
+// PUT /users/:id - User can update their own data, admin/owner can update any user data
 const updateUser = async (req, res) => {
   try {
     const targetUserId = req.params.id;
-    const currentUserId = req.user.userId;
     const currentUserRole = req.user.role;
 
-    // Check authorization: user can update their own data, admin can update any data
-    if (currentUserRole !== "admin" && targetUserId !== currentUserId) {
-      return res.status(403).json({ 
-        error: "Access denied. You can only update your own profile." 
-      });
-    }
-
-    const { name, phone, gender, birthday, role, password, adminKey } = req.body;
+    // Authorization is handled by authUserModify middleware
+    const { name, phone, gender, birthday, role, password, adminKey } =
+      req.body;
 
     // Validate phone uniqueness if provided
     if (phone) {
-      const existingPhone = await UserModel.findOne({ 
-        phone, 
-        _id: { $ne: targetUserId } 
+      const existingPhone = await UserModel.findOne({
+        phone,
+        _id: { $ne: targetUserId },
       });
       if (existingPhone) {
         return res.status(400).json({ error: "Phone number already exists" });
@@ -187,7 +199,9 @@ const updateUser = async (req, res) => {
     let updateData = {};
     if (name) {
       if (name.length < 3) {
-        return res.status(400).json({ error: "Name must be at least 3 characters" });
+        return res
+          .status(400)
+          .json({ error: "Name must be at least 3 characters" });
       }
       updateData.name = name;
     }
@@ -199,42 +213,50 @@ const updateUser = async (req, res) => {
     }
     if (gender) {
       if (gender.length < 4) {
-        return res.status(400).json({ error: "Gender must be at least 4 characters" });
+        return res
+          .status(400)
+          .json({ error: "Gender must be at least 4 characters" });
       }
       updateData.gender = gender;
     }
     if (birthday) updateData.birthday = birthday;
-    
-    // Only admins can change roles, and only to valid roles
+
+    // Only admins and owners can change roles, and only to valid roles
     if (role) {
-      if (currentUserRole !== "admin") {
-        return res.status(403).json({ error: "Only admins can change user roles" });
+      if (!["admin", "owner"].includes(currentUserRole)) {
+        return res
+          .status(403)
+          .json({ error: "Only admins and owners can change user roles" });
       }
       if (!["admin", "owner", "user"].includes(role)) {
-        return res.status(400).json({ error: "Invalid role. Must be 'admin', 'owner', or 'user'" });
+        return res
+          .status(400)
+          .json({ error: "Invalid role. Must be 'admin', 'owner', or 'user'" });
       }
-      
+
       // Admin role protection: require ADMIN_KEY when promoting to admin
       if (role === "admin") {
         if (!adminKey) {
-          return res.status(400).json({ 
-            error: "Admin key is required to assign admin role" 
+          return res.status(400).json({
+            error: "Admin key is required to assign admin role",
           });
         }
         if (adminKey !== process.env.ADMIN_KEY) {
-          return res.status(403).json({ 
-            error: "Invalid admin key. Access denied." 
+          return res.status(403).json({
+            error: "Invalid admin key. Access denied.",
           });
         }
       }
-      
+
       updateData.role = role;
     }
 
     // Hash password if provided
     if (password) {
       if (password.length < 6) {
-        return res.status(400).json({ error: "Password must be at least 6 characters" });
+        return res
+          .status(400)
+          .json({ error: "Password must be at least 6 characters" });
       }
       // Get user's email for dynamic salting
       const user = await UserModel.findById(targetUserId);
@@ -249,7 +271,7 @@ const updateUser = async (req, res) => {
       targetUserId,
       updateData,
       { new: true }
-    ).select('-password');
+    ).select("-password");
 
     if (!updatedUser) {
       return res.status(404).json({ error: "User not found" });
@@ -260,31 +282,26 @@ const updateUser = async (req, res) => {
       user: updatedUser,
     });
   } catch (error) {
-    res.status(500).json({ error: "Error updating user", message: error.message });
+    res
+      .status(500)
+      .json({ error: "Error updating user", message: error.message });
   }
 };
 
-// PATCH /users/:id - User can patch their own data, admin can patch any user data
+// PATCH /users/:id - User can patch their own data, admin/owner can patch any user data
 const patchUser = async (req, res) => {
   try {
     const targetUserId = req.params.id;
-    const currentUserId = req.user.userId;
     const currentUserRole = req.user.role;
 
-    // Check authorization: user can patch their own data, admin can patch any data
-    if (currentUserRole !== "admin" && targetUserId !== currentUserId) {
-      return res.status(403).json({ 
-        error: "Access denied. You can only update your own profile." 
-      });
-    }
-
+    // Authorization is handled by authUserModify middleware
     const { name, phone, gender, birthday, role, adminKey } = req.body;
 
     // Validate phone uniqueness if provided
     if (phone) {
-      const existingPhone = await UserModel.findOne({ 
-        phone, 
-        _id: { $ne: targetUserId } 
+      const existingPhone = await UserModel.findOne({
+        phone,
+        _id: { $ne: targetUserId },
       });
       if (existingPhone) {
         return res.status(400).json({ error: "Phone number already exists" });
@@ -294,7 +311,9 @@ const patchUser = async (req, res) => {
     let updateData = {};
     if (name) {
       if (name.length < 3) {
-        return res.status(400).json({ error: "Name must be at least 3 characters" });
+        return res
+          .status(400)
+          .json({ error: "Name must be at least 3 characters" });
       }
       updateData.name = name;
     }
@@ -306,48 +325,56 @@ const patchUser = async (req, res) => {
     }
     if (gender) {
       if (gender.length < 4) {
-        return res.status(400).json({ error: "Gender must be at least 4 characters" });
+        return res
+          .status(400)
+          .json({ error: "Gender must be at least 4 characters" });
       }
       updateData.gender = gender;
     }
     if (birthday) updateData.birthday = birthday;
-    
-    // Only admins can change roles, and only to valid roles
+
+    // Only admins and owners can change roles, and only to valid roles
     if (role) {
-      if (currentUserRole !== "admin") {
-        return res.status(403).json({ error: "Only admins can change user roles" });
+      if (!["admin", "owner"].includes(currentUserRole)) {
+        return res
+          .status(403)
+          .json({ error: "Only admins and owners can change user roles" });
       }
       if (!["admin", "owner", "user"].includes(role)) {
-        return res.status(400).json({ error: "Invalid role. Must be 'admin', 'owner', or 'user'" });
+        return res
+          .status(400)
+          .json({ error: "Invalid role. Must be 'admin', 'owner', or 'user'" });
       }
-      
+
       // Admin role protection: require ADMIN_KEY when promoting to admin
       if (role === "admin") {
         if (!adminKey) {
-          return res.status(400).json({ 
-            error: "Admin key is required to assign admin role" 
+          return res.status(400).json({
+            error: "Admin key is required to assign admin role",
           });
         }
         if (adminKey !== process.env.ADMIN_KEY) {
-          return res.status(403).json({ 
-            error: "Invalid admin key. Access denied." 
+          return res.status(403).json({
+            error: "Invalid admin key. Access denied.",
           });
         }
       }
-      
+
       updateData.role = role;
     }
 
     // Check if there's anything to update
     if (Object.keys(updateData).length === 0) {
-      return res.status(400).json({ error: "No valid fields provided for update" });
+      return res
+        .status(400)
+        .json({ error: "No valid fields provided for update" });
     }
 
     const patchedUser = await UserModel.findByIdAndUpdate(
       targetUserId,
       { $set: updateData },
       { new: true }
-    ).select('-password');
+    ).select("-password");
 
     if (!patchedUser) {
       return res.status(404).json({ error: "User not found" });
@@ -358,28 +385,25 @@ const patchUser = async (req, res) => {
       user: patchedUser,
     });
   } catch (error) {
-    res.status(500).json({ error: "Error patching user", message: error.message });
+    res
+      .status(500)
+      .json({ error: "Error patching user", message: error.message });
   }
 };
 
-// DELETE /users/:id - User can delete their own account, admin can delete any user
+// DELETE /users/:id - User can delete their own account, admin/owner can delete any user
 const deleteUser = async (req, res) => {
   try {
     const targetUserId = req.params.id;
     const currentUserId = req.user.userId;
     const currentUserRole = req.user.role;
 
-    // Check authorization: user can delete their own account, admin can delete any account
-    if (currentUserRole !== "admin" && targetUserId !== currentUserId) {
-      return res.status(403).json({ 
-        error: "Access denied. You can only delete your own account." 
-      });
-    }
-
-    // Prevent admin from deleting themselves (optional safety check)
-    if (currentUserRole === "admin" && targetUserId === currentUserId) {
-      return res.status(400).json({ 
-        error: "Admins cannot delete their own account. Contact another admin." 
+    // Authorization is handled by authUserModify middleware
+    
+    // Prevent users with high privileges from deleting themselves (safety check)
+    if (["admin", "owner"].includes(currentUserRole) && targetUserId === currentUserId) {
+      return res.status(400).json({
+        error: "Admins and owners cannot delete their own account. Contact another admin.",
       });
     }
 
@@ -388,16 +412,18 @@ const deleteUser = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    res.status(200).json({ 
+    res.status(200).json({
       message: "User deleted successfully",
       deletedUser: {
         id: deletedUser._id,
         name: deletedUser.name,
-        email: deletedUser.email
-      }
+        email: deletedUser.email,
+      },
     });
   } catch (error) {
-    res.status(500).json({ error: "Error deleting user", message: error.message });
+    res
+      .status(500)
+      .json({ error: "Error deleting user", message: error.message });
   }
 };
 
@@ -448,7 +474,7 @@ const loginUser = async (req, res) => {
 const getCurrentUser = async (req, res) => {
   try {
     // req.user is set by auth middleware
-    const user = await UserModel.findById(req.user.userId).select('-password');
+    const user = await UserModel.findById(req.user.userId).select("-password");
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
@@ -468,10 +494,12 @@ const getCurrentUser = async (req, res) => {
         role: req.user.role,
         userId: req.user.userId,
         email: req.user.email,
-      }
+      },
     });
   } catch (error) {
-    res.status(500).json({ error: "Error fetching user info", message: error.message });
+    res
+      .status(500)
+      .json({ error: "Error fetching user info", message: error.message });
   }
 };
 
@@ -497,11 +525,13 @@ const logoutUser = async (req, res) => {
 
     await blacklistEntry.save();
 
-    res.status(200).json({ 
-      message: "User logged out successfully. Token has been revoked." 
+    res.status(200).json({
+      message: "User logged out successfully. Token has been revoked.",
     });
   } catch (error) {
-    res.status(500).json({ error: "Error logging out user", message: error.message });
+    res
+      .status(500)
+      .json({ error: "Error logging out user", message: error.message });
   }
 };
 
@@ -515,8 +545,8 @@ const logoutAllDevices = async (req, res) => {
     // If there's an ID parameter, admin middleware already verified admin role
     // If no ID parameter, user is logging out their own devices
     if (!req.params.id && targetUserId !== currentUserId) {
-      return res.status(403).json({ 
-        error: "Access denied. You can only logout your own devices." 
+      return res.status(403).json({
+        error: "Access denied. You can only logout your own devices.",
       });
     }
 
@@ -534,16 +564,21 @@ const logoutAllDevices = async (req, res) => {
 
     await blacklistEntry.save();
 
-    const message = req.params.id 
+    const message = req.params.id
       ? `Logged out user ${targetUserId} from all devices successfully.`
       : "Logged out from all devices successfully. All tokens have been revoked.";
 
-    res.status(200).json({ 
+    res.status(200).json({
       message: message,
-      note: "User will need to log in again on all devices."
+      note: "User will need to log in again on all devices.",
     });
   } catch (error) {
-    res.status(500).json({ error: "Error logging out from all devices", message: error.message });
+    res
+      .status(500)
+      .json({
+        error: "Error logging out from all devices",
+        message: error.message,
+      });
   }
 };
 
@@ -552,16 +587,20 @@ const getTokenStats = async (req, res) => {
   try {
     // Check if user is admin
     if (req.user.role !== "admin") {
-      return res.status(403).json({ error: "Access denied. Admin privileges required." });
+      return res
+        .status(403)
+        .json({ error: "Access denied. Admin privileges required." });
     }
 
     const stats = await getBlacklistStats();
     res.status(200).json({
       message: "Token blacklist statistics retrieved successfully",
-      stats: stats
+      stats: stats,
     });
   } catch (error) {
-    res.status(500).json({ error: "Error retrieving token stats", message: error.message });
+    res
+      .status(500)
+      .json({ error: "Error retrieving token stats", message: error.message });
   }
 };
 
@@ -570,16 +609,312 @@ const cleanupTokens = async (req, res) => {
   try {
     // Check if user is admin
     if (req.user.role !== "admin") {
-      return res.status(403).json({ error: "Access denied. Admin privileges required." });
+      return res
+        .status(403)
+        .json({ error: "Access denied. Admin privileges required." });
     }
 
     const deletedCount = await cleanupExpiredTokens();
     res.status(200).json({
       message: "Expired tokens cleaned up successfully",
-      deletedCount: deletedCount
+      deletedCount: deletedCount,
     });
   } catch (error) {
-    res.status(500).json({ error: "Error cleaning up tokens", message: error.message });
+    res
+      .status(500)
+      .json({ error: "Error cleaning up tokens", message: error.message });
+  }
+};
+
+const adminInvite = async (req, res) => {
+  try {
+    // Check if user is admin
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ error: "Access denied. Admin privileges required." });
+    }
+
+    const { email, expiresIn = "24h", role = "user" } = req.body;
+
+    // Validate email if provided
+    if (email && !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
+    // Validate role
+    if (!["admin", "owner", "user"].includes(role)) {
+      return res.status(400).json({ 
+        error: "Invalid role. Must be 'admin', 'owner', or 'user'" 
+      });
+    }
+
+    // Check if admin key is required for admin role
+    if (role === "admin" && !req.body.adminKey) {
+      return res.status(400).json({
+        error: "Admin key is required to create admin invites"
+      });
+    }
+
+    if (role === "admin" && req.body.adminKey !== process.env.ADMIN_KEY) {
+      return res.status(403).json({
+        error: "Invalid admin key. Access denied."
+      });
+    }
+
+    // Generate invite token with specific payload
+    const invitePayload = {
+      type: "invite",
+      invitedBy: req.user.userId,
+      inviterRole: req.user.role,
+      targetRole: role,
+      email: email || null,
+      createdAt: new Date(),
+    };
+
+    const inviteToken = jwt.sign(invitePayload, process.env.JWT_SECRET, {
+      expiresIn: expiresIn,
+    });
+
+    // Create invite URL (you can customize this based on your frontend)
+    const inviteUrl = `${req.protocol}://${req.get('host')}/invite?token=${inviteToken}`;
+
+    res.status(200).json({
+      message: "Admin invite created successfully",
+      invite: {
+        token: inviteToken,
+        url: inviteUrl,
+        expiresIn: expiresIn,
+        targetRole: role,
+        email: email || "No specific email",
+        createdBy: req.user.email,
+      },
+      instructions: email 
+        ? `Invite sent for ${email}. Share the token or URL with the recipient.`
+        : "General invite created. Share the token or URL with the intended recipient."
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Error creating admin invite", message: error.message });
+  }
+};
+
+// Admin: Get system statistics
+const getSystemStats = async (req, res) => {
+  try {
+    // Check if user is admin
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ error: "Access denied. Admin privileges required." });
+    }
+
+    // Get user statistics by role
+    const userStats = await UserModel.aggregate([
+      {
+        $group: {
+          _id: "$role",
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // Get total users
+    const totalUsers = await UserModel.countDocuments();
+
+    // Get recent users (last 7 days)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
+    const recentUsers = await UserModel.countDocuments({
+      createdAt: { $gte: sevenDaysAgo }
+    });
+
+    // Get token blacklist stats
+    const tokenStats = await getBlacklistStats();
+
+    res.status(200).json({
+      message: "System statistics retrieved successfully",
+      stats: {
+        users: {
+          total: totalUsers,
+          byRole: userStats.reduce((acc, stat) => {
+            acc[stat._id] = stat.count;
+            return acc;
+          }, {}),
+          recentSignups: recentUsers
+        },
+        tokens: tokenStats,
+        systemInfo: {
+          uptime: process.uptime(),
+          nodeVersion: process.version,
+          platform: process.platform
+        }
+      }
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Error retrieving system stats", message: error.message });
+  }
+};
+
+// Admin: Verify invite token
+const verifyInvite = async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({ error: "Invite token is required" });
+    }
+
+    // Verify and decode the invite token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Check if it's an invite token
+    if (decoded.type !== "invite") {
+      return res.status(400).json({ error: "Invalid invite token" });
+    }
+
+    res.status(200).json({
+      message: "Invite token is valid",
+      invite: {
+        targetRole: decoded.targetRole,
+        email: decoded.email,
+        invitedBy: decoded.inviterRole,
+        createdAt: decoded.createdAt,
+        expiresAt: new Date(decoded.exp * 1000)
+      }
+    });
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: "Invite token has expired" });
+    }
+    res.status(400).json({ error: "Invalid invite token" });
+  }
+};
+
+// Admin: Sign up with invite token
+const signupWithInvite = async (req, res) => {
+  try {
+    const { 
+      token, 
+      name, 
+      email, 
+      phone, 
+      gender, 
+      birthday, 
+      password 
+    } = req.body;
+
+    if (!token) {
+      return res.status(400).json({ error: "Invite token is required" });
+    }
+
+    // Verify and decode the invite token
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        return res.status(401).json({ error: "Invite token has expired" });
+      }
+      return res.status(400).json({ error: "Invalid invite token" });
+    }
+
+    // Check if it's an invite token
+    if (decoded.type !== "invite") {
+      return res.status(400).json({ error: "Invalid invite token" });
+    }
+
+    // If invite was for specific email, validate it matches
+    if (decoded.email && decoded.email !== email) {
+      return res.status(400).json({ 
+        error: "Email does not match the invited email address" 
+      });
+    }
+
+    // Validate required fields
+    if (!email || !name || !phone || !gender || !birthday || !password) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    // Validation checks
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+    if (!phone.match(/^\d{11}$/)) {
+      return res.status(400).json({ error: "Invalid phone number format" });
+    }
+    if (password.length < 6) {
+      return res
+        .status(400)
+        .json({ error: "Password must be at least 6 characters" });
+    }
+    if (name.length < 3) {
+      return res
+        .status(400)
+        .json({ error: "Name must be at least 3 characters" });
+    }
+    if (gender.length < 4) {
+      return res
+        .status(400)
+        .json({ error: "Gender must be at least 4 characters" });
+    }
+
+    // Check if user already exists
+    const existingUser = await UserModel.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: "User already exists" });
+    }
+
+    // Check if phone number already exists
+    const existingPhone = await UserModel.findOne({ phone });
+    if (existingPhone) {
+      return res.status(400).json({ error: "Phone number already exists" });
+    }
+
+    // Hash the password
+    const saltRounds = (saltingString(email) % 10) + 5;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Create user with role from invite
+    const newUser = new UserModel({
+      name,
+      email,
+      phone,
+      gender,
+      birthday,
+      role: decoded.targetRole,
+      password: hashedPassword,
+    });
+
+    await newUser.save();
+
+    // Create JWT token
+    const userToken = jwt.sign(
+      { userId: newUser._id, email: email, role: decoded.targetRole },
+      JWT_SECRET,
+      { expiresIn: "5D" }
+    );
+
+    res.status(201).json({
+      message: `User created successfully with ${decoded.targetRole} role via invite`,
+      token: userToken,
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+      },
+      inviteInfo: {
+        invitedBy: decoded.inviterRole,
+        originalTargetRole: decoded.targetRole
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -596,4 +931,8 @@ module.exports = {
   getTokenStats,
   cleanupTokens,
   getCurrentUser,
+  adminInvite,
+  getSystemStats,
+  verifyInvite,
+  signupWithInvite
 };
