@@ -468,8 +468,9 @@ const logoutAllDevices = async (req, res) => {
     const currentUserId = req.user.userId;
     const currentUserRole = req.user.role;
 
-    // Check authorization: user can logout all their devices, admin can logout any user's devices
-    if (currentUserRole !== "admin" && targetUserId !== currentUserId) {
+    // If there's an ID parameter, admin middleware already verified admin role
+    // If no ID parameter, user is logging out their own devices
+    if (!req.params.id && targetUserId !== currentUserId) {
       return res.status(403).json({ 
         error: "Access denied. You can only logout your own devices." 
       });
@@ -489,40 +490,16 @@ const logoutAllDevices = async (req, res) => {
 
     await blacklistEntry.save();
 
+    const message = req.params.id 
+      ? `Logged out user ${targetUserId} from all devices successfully.`
+      : "Logged out from all devices successfully. All tokens have been revoked.";
+
     res.status(200).json({ 
-      message: "Logged out from all devices successfully. All tokens have been revoked.",
-      note: "Users will need to log in again on all devices."
+      message: message,
+      note: "User will need to log in again on all devices."
     });
   } catch (error) {
     res.status(500).json({ error: "Error logging out from all devices", message: error.message });
-  }
-};
-
-// Check if current token is valid (not blacklisted)
-const validateToken = async (req, res) => {
-  try {
-    // If we reach here, token is valid (auth middleware passed)
-    const user = await UserModel.findById(req.user.userId).select('-password');
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    res.status(200).json({
-      message: "Token is valid",
-      valid: true,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
-      tokenInfo: {
-        issuedAt: new Date(req.user.iat * 1000),
-        expiresAt: new Date(req.user.exp * 1000),
-      }
-    });
-  } catch (error) {
-    res.status(500).json({ error: "Error validating token", message: error.message });
   }
 };
 
@@ -572,7 +549,6 @@ module.exports = {
   loginUser,
   logoutUser,
   logoutAllDevices,
-  validateToken,
   getTokenStats,
   cleanupTokens,
   getCurrentUser,

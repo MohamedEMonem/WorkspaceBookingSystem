@@ -11,7 +11,6 @@ const {
   loginUser,
   logoutUser,
   logoutAllDevices,
-  validateToken,
   getTokenStats,
   cleanupTokens,
   getCurrentUser,
@@ -31,10 +30,7 @@ router.post("/logout", auth, logoutUser);
 
 // POST /users/logout-all - Log out from all devices (self or admin for others)
 router.post("/logout-all", auth, logoutAllDevices);
-router.post("/logout-all/:id", auth, logoutAllDevices);
-
-// GET /users/validate-token - Validate current token
-router.get("/validate-token", auth, validateToken);
+router.post("/logout-all/:id", auth, authAdmin, logoutAllDevices);
 
 // Admin-only routes
 // GET /users - Get all users (admin only)
