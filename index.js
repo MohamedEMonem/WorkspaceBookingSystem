@@ -16,7 +16,7 @@ app.use("/sloutions", sloutionsRoutes);
 
 mongoose
   .connect(
-    "mongodb+srv://mohamedemoniem:UoIKjgHG4DECbuPO@workspacedb.moqih61.mongodb.net/workspaceDB"
+    process.env.MONGODB_URI,
   )
   .then(() => {
     console.log("Connection to DB is Successfully");
