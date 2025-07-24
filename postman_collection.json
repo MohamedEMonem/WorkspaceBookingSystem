@@ -41,6 +41,11 @@
       "type": "string"
     },
     {
+      "key": "admin_key",
+      "value": "adminy(g@{LNR=pPvV/\"vo*`<g(,kwat$KOTrX_&7?@.B=|r|~f=mET5qxzpV_!MqLY[O`apd-5Xh9!4NZNN>+L0Rp@dEaLg3Eq^3pH2!(H^v4_%\"1h}0oU9p2g333+0\"oo$]I`0bv0dTtd&X_tmzc]m]qu$0^o9kE>@Z3E{Piln+_ij1Q00[Gj^_oipNL`Qtn2++ela;*u&RASlvj@d{H<$JDg@A@gLx-EcOytMb_xY=`h^hHlb9yus<d1]zzsxC@D6x",
+      "type": "string"
+    },
+    {
       "key": "user2_id",
       "value": "",
       "type": "string"
@@ -90,7 +95,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Admin User\",\n  \"email\": \"admin@test.com\",\n  \"phone\": \"12345678901\",\n  \"gender\": \"male\",\n  \"birthday\": \"1990-01-01\",\n  \"role\": \"admin\",\n  \"password\": \"admin123\"\n}"
+              "raw": "{\n  \"name\": \"Admin User\",\n  \"email\": \"admin@test.com\",\n  \"phone\": \"12345678901\",\n  \"gender\": \"male\",\n  \"birthday\": \"1990-01-01\",\n  \"role\": \"admin\",\n  \"password\": \"admin123\",\n  \"adminKey\": \"{{admin_key}}\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/users/signup",

@@ -1,0 +1,550 @@
+{
+	"id": "57d97164-bec2-4106-8efe-5c8b127b8d86",
+	"name": "Workspace Booking System - User API",
+	"timestamp": "2025-07-24T14:56:39.206Z",
+	"collection_id": "43586425-6989246d-9d3f-438d-a19b-16e6c747341d",
+	"folder_id": 0,
+	"environment_id": "0",
+	"totalPass": 0,
+	"delay": "100",
+	"persist": true,
+	"status": "finished",
+	"startedAt": "2025-07-24T14:56:31.302Z",
+	"totalFail": 0,
+	"results": [
+		{
+			"id": "64b7f6f0-eb1b-43d6-96e3-4c2d0690d9fc",
+			"name": "1.1 Sign Up Admin User",
+			"url": "http://localhost:5000/users/signup",
+			"time": 187,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				187
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "9b65df25-6ea2-463c-8e95-864e2d952de5",
+			"name": "1.2 Sign Up Regular User",
+			"url": "http://localhost:5000/users/signup",
+			"time": 180,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				180
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "f859e332-7c08-4c69-b61a-a4e2da0efebc",
+			"name": "1.3 Login Admin",
+			"url": "http://localhost:5000/users/login",
+			"time": 64,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				64
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "e2720159-199a-47f7-a252-2776f43a354c",
+			"name": "1.4 Login Regular User",
+			"url": "http://localhost:5000/users/login",
+			"time": 64,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				64
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "04f8dffc-3d28-4a56-a3a1-1ce80c9df65d",
+			"name": "2.1 Get Current User (Me)",
+			"url": "http://localhost:5000/users/me",
+			"time": 121,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				121
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "94b4f876-1aaf-4c6f-9005-c6188cefbb07",
+			"name": "2.2 Get User by ID (Self)",
+			"url": "http://localhost:5000/users/688249a0942f22a889a4546e",
+			"time": 114,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				114
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "057fa0d7-89ac-471b-b3eb-35817f1b054c",
+			"name": "2.3 Update User Profile (PUT)",
+			"url": "http://localhost:5000/users/688249a0942f22a889a4546e",
+			"time": 178,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				178
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "ade11b37-7287-4352-88a0-5d8d3a97b410",
+			"name": "2.4 Update User Profile (PATCH)",
+			"url": "http://localhost:5000/users/688249a0942f22a889a4546e",
+			"time": 128,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				128
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "828285da-1aea-4098-bc28-4875b93592ae",
+			"name": "3.1 Get All Users (Admin Only)",
+			"url": "http://localhost:5000/users",
+			"time": 116,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				116
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "5039ca89-5336-4a3b-a14b-e845fbb4a0e2",
+			"name": "3.2 Get Any User by ID (Admin)",
+			"url": "http://localhost:5000/users/688249a0942f22a889a4546e",
+			"time": 115,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				115
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "9492be8b-8753-43c7-9d99-5e9ce1d8425b",
+			"name": "3.3 Update User Role (Admin Only)",
+			"url": "http://localhost:5000/users/688249a0942f22a889a4546e",
+			"time": 120,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				120
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "99c6de44-03d6-4a54-aa4e-86f71d92fd55",
+			"name": "3.4 Delete User (Admin)",
+			"url": "http://localhost:5000/users/688249a0942f22a889a4546e",
+			"time": 119,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				119
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "1184fd43-6c31-458e-bca7-68c1971750bf",
+			"name": "4.1 Validate Current Token",
+			"url": "http://localhost:5000/users/validate-token",
+			"time": 114,
+			"responseCode": {
+				"code": 404,
+				"name": "Not Found"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				114
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "a0799ef3-8b6c-4743-bba6-caa7bf632a28",
+			"name": "4.2 Logout (Blacklist Token)",
+			"url": "http://localhost:5000/users/logout",
+			"time": 122,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				122
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "7df3b989-b065-473e-b14d-06bd8293616a",
+			"name": "4.3 Logout All Devices (Self)",
+			"url": "http://localhost:5000/users/logout-all",
+			"time": 59,
+			"responseCode": {
+				"code": 401,
+				"name": "Unauthorized"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				59
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "0c00ac66-d647-4735-90c4-aa0fb2d9764a",
+			"name": "4.4 Logout All Devices for User (Admin)",
+			"url": "http://localhost:5000/users/logout-all/688249a0942f22a889a4546e",
+			"time": 120,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				120
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "27bb5d8b-9482-427a-a8ad-fe2e49cd4439",
+			"name": "5.1 Get Token Statistics (Admin)",
+			"url": "http://localhost:5000/users/admin/token-stats",
+			"time": 59,
+			"responseCode": {
+				"code": 401,
+				"name": "Unauthorized"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				59
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "6e33d336-97fc-4922-94ad-337942f0f187",
+			"name": "5.2 Cleanup Expired Tokens (Admin)",
+			"url": "http://localhost:5000/users/admin/cleanup-tokens",
+			"time": 61,
+			"responseCode": {
+				"code": 401,
+				"name": "Unauthorized"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				61
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "d52c5aff-9353-4eff-8585-0a6d05c725fe",
+			"name": "6.1 Access Admin Endpoint as User (Should Fail)",
+			"url": "http://localhost:5000/users",
+			"time": 59,
+			"responseCode": {
+				"code": 401,
+				"name": "Unauthorized"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				59
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "068a373a-e4a1-4789-b39a-4f508f922cf4",
+			"name": "6.2 Access with No Token (Should Fail)",
+			"url": "http://localhost:5000/users/me",
+			"time": 59,
+			"responseCode": {
+				"code": 401,
+				"name": "Unauthorized"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				59
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "edd6a357-dc54-4962-9120-da0146c4f544",
+			"name": "6.3 Access with Invalid Token (Should Fail)",
+			"url": "http://localhost:5000/users/me",
+			"time": 59,
+			"responseCode": {
+				"code": 401,
+				"name": "Unauthorized"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				59
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "f4f8de95-428a-4918-92ab-43781e512b74",
+			"name": "6.4 Access Other User's Data (Should Fail)",
+			"url": "http://localhost:5000/users/688249a0942f22a889a4546a",
+			"time": 59,
+			"responseCode": {
+				"code": 401,
+				"name": "Unauthorized"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				59
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "b477c99b-927c-4d18-8c08-032f41bd6a1b",
+			"name": "6.5 Try to Change Role as User (Should Fail)",
+			"url": "http://localhost:5000/users/688249a0942f22a889a4546e",
+			"time": 59,
+			"responseCode": {
+				"code": 401,
+				"name": "Unauthorized"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				59
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "f3d50e39-d4e7-4f6e-9d08-63033b26da45",
+			"name": "7.1 Use Token After Logout (Should Fail)",
+			"url": "http://localhost:5000/users/me",
+			"time": 59,
+			"responseCode": {
+				"code": 401,
+				"name": "Unauthorized"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				59
+			],
+			"allTests": [
+				{}
+			]
+		}
+	],
+	"count": 1,
+	"totalTime": 2395,
+	"collection": {
+		"requests": [
+			{
+				"id": "64b7f6f0-eb1b-43d6-96e3-4c2d0690d9fc",
+				"method": "POST"
+			},
+			{
+				"id": "9b65df25-6ea2-463c-8e95-864e2d952de5",
+				"method": "POST"
+			},
+			{
+				"id": "f859e332-7c08-4c69-b61a-a4e2da0efebc",
+				"method": "POST"
+			},
+			{
+				"id": "e2720159-199a-47f7-a252-2776f43a354c",
+				"method": "POST"
+			},
+			{
+				"id": "04f8dffc-3d28-4a56-a3a1-1ce80c9df65d",
+				"method": "GET"
+			},
+			{
+				"id": "94b4f876-1aaf-4c6f-9005-c6188cefbb07",
+				"method": "GET"
+			},
+			{
+				"id": "057fa0d7-89ac-471b-b3eb-35817f1b054c",
+				"method": "PUT"
+			},
+			{
+				"id": "ade11b37-7287-4352-88a0-5d8d3a97b410",
+				"method": "PATCH"
+			},
+			{
+				"id": "828285da-1aea-4098-bc28-4875b93592ae",
+				"method": "GET"
+			},
+			{
+				"id": "5039ca89-5336-4a3b-a14b-e845fbb4a0e2",
+				"method": "GET"
+			},
+			{
+				"id": "9492be8b-8753-43c7-9d99-5e9ce1d8425b",
+				"method": "PUT"
+			},
+			{
+				"id": "99c6de44-03d6-4a54-aa4e-86f71d92fd55",
+				"method": "DELETE"
+			},
+			{
+				"id": "1184fd43-6c31-458e-bca7-68c1971750bf",
+				"method": "GET"
+			},
+			{
+				"id": "a0799ef3-8b6c-4743-bba6-caa7bf632a28",
+				"method": "POST"
+			},
+			{
+				"id": "7df3b989-b065-473e-b14d-06bd8293616a",
+				"method": "POST"
+			},
+			{
+				"id": "0c00ac66-d647-4735-90c4-aa0fb2d9764a",
+				"method": "POST"
+			},
+			{
+				"id": "27bb5d8b-9482-427a-a8ad-fe2e49cd4439",
+				"method": "GET"
+			},
+			{
+				"id": "6e33d336-97fc-4922-94ad-337942f0f187",
+				"method": "POST"
+			},
+			{
+				"id": "d52c5aff-9353-4eff-8585-0a6d05c725fe",
+				"method": "GET"
+			},
+			{
+				"id": "068a373a-e4a1-4789-b39a-4f508f922cf4",
+				"method": "GET"
+			},
+			{
+				"id": "edd6a357-dc54-4962-9120-da0146c4f544",
+				"method": "GET"
+			},
+			{
+				"id": "f4f8de95-428a-4918-92ab-43781e512b74",
+				"method": "GET"
+			},
+			{
+				"id": "b477c99b-927c-4d18-8c08-032f41bd6a1b",
+				"method": "PUT"
+			},
+			{
+				"id": "f3d50e39-d4e7-4f6e-9d08-63033b26da45",
+				"method": "GET"
+			}
+		]
+	}
+}

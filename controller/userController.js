@@ -37,7 +37,7 @@ const getAllUsers = async (req, res) => {
 
 const createUser = async (req, res) => {
   try {
-    const { email, name, phone, gender, birthday, role, password } = req.body;
+    const { email, name, phone, gender, birthday, role, password, adminKey } = req.body;
     
     // Check if user already exists
     const existingUser = await UserModel.findOne({ email });
@@ -74,6 +74,20 @@ const createUser = async (req, res) => {
     }
     if (!["admin", "owner", "user"].includes(role)) {
       return res.status(400).json({ error: "Role must be 'admin', 'owner', or 'user'" });
+    }
+
+    // Admin role protection: require ADMIN_KEY
+    if (role === "admin") {
+      if (!adminKey) {
+        return res.status(400).json({ 
+          error: "Admin key is required to create admin accounts" 
+        });
+      }
+      if (adminKey !== process.env.ADMIN_KEY) {
+        return res.status(403).json({ 
+          error: "Invalid admin key. Access denied." 
+        });
+      }
     }
 
     // Hash the password
@@ -157,7 +171,7 @@ const updateUser = async (req, res) => {
       });
     }
 
-    const { name, phone, gender, birthday, role, password } = req.body;
+    const { name, phone, gender, birthday, role, password, adminKey } = req.body;
 
     // Validate phone uniqueness if provided
     if (phone) {
@@ -199,6 +213,21 @@ const updateUser = async (req, res) => {
       if (!["admin", "owner", "user"].includes(role)) {
         return res.status(400).json({ error: "Invalid role. Must be 'admin', 'owner', or 'user'" });
       }
+      
+      // Admin role protection: require ADMIN_KEY when promoting to admin
+      if (role === "admin") {
+        if (!adminKey) {
+          return res.status(400).json({ 
+            error: "Admin key is required to assign admin role" 
+          });
+        }
+        if (adminKey !== process.env.ADMIN_KEY) {
+          return res.status(403).json({ 
+            error: "Invalid admin key. Access denied." 
+          });
+        }
+      }
+      
       updateData.role = role;
     }
 
@@ -249,7 +278,7 @@ const patchUser = async (req, res) => {
       });
     }
 
-    const { name, phone, gender, birthday, role } = req.body;
+    const { name, phone, gender, birthday, role, adminKey } = req.body;
 
     // Validate phone uniqueness if provided
     if (phone) {
@@ -291,6 +320,21 @@ const patchUser = async (req, res) => {
       if (!["admin", "owner", "user"].includes(role)) {
         return res.status(400).json({ error: "Invalid role. Must be 'admin', 'owner', or 'user'" });
       }
+      
+      // Admin role protection: require ADMIN_KEY when promoting to admin
+      if (role === "admin") {
+        if (!adminKey) {
+          return res.status(400).json({ 
+            error: "Admin key is required to assign admin role" 
+          });
+        }
+        if (adminKey !== process.env.ADMIN_KEY) {
+          return res.status(403).json({ 
+            error: "Invalid admin key. Access denied." 
+          });
+        }
+      }
+      
       updateData.role = role;
     }
 
