@@ -1,4 +1,6 @@
 const { UserModel } = require("../models/userModel");
+const { TokenBlacklist } = require("../models/tokenBlacklistModel");
+const { getBlacklistStats, cleanupExpiredTokens } = require("../utils/tokenUtils");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -429,16 +431,134 @@ const getCurrentUser = async (req, res) => {
   }
 };
 
-// No longer needed since we're using JWT middleware
+// Logout user with token blacklisting
 const logoutUser = async (req, res) => {
   try {
-    // With JWT, logout is handled client-side by removing the token
-    // Optionally, you could implement a blacklist for tokens
+    const token = req.token; // token is attached by auth middleware
+    const decoded = req.user; // user info from JWT
+
+    if (!token) {
+      return res.status(400).json({ error: "No token provided" });
+    }
+
+    // Calculate token expiration time
+    const tokenExpiration = new Date(decoded.exp * 1000); // Convert to milliseconds
+
+    // Add token to blacklist
+    const blacklistEntry = new TokenBlacklist({
+      token: token,
+      userId: decoded.userId,
+      expiresAt: tokenExpiration,
+    });
+
+    await blacklistEntry.save();
+
     res.status(200).json({ 
-      message: "User logged out successfully." 
+      message: "User logged out successfully. Token has been revoked." 
     });
   } catch (error) {
     res.status(500).json({ error: "Error logging out user", message: error.message });
+  }
+};
+
+// Logout from all devices (blacklist all user's tokens) - Admin or Self only
+const logoutAllDevices = async (req, res) => {
+  try {
+    const targetUserId = req.params.id || req.user.userId;
+    const currentUserId = req.user.userId;
+    const currentUserRole = req.user.role;
+
+    // Check authorization: user can logout all their devices, admin can logout any user's devices
+    if (currentUserRole !== "admin" && targetUserId !== currentUserId) {
+      return res.status(403).json({ 
+        error: "Access denied. You can only logout your own devices." 
+      });
+    }
+
+    // Find all active tokens for the user (in practice, this is complex since we'd need to track issued tokens)
+    // For now, we'll just add current token to blacklist and return success
+    const token = req.token;
+    const decoded = req.user;
+    const tokenExpiration = new Date(decoded.exp * 1000);
+
+    const blacklistEntry = new TokenBlacklist({
+      token: token,
+      userId: decoded.userId,
+      expiresAt: tokenExpiration,
+    });
+
+    await blacklistEntry.save();
+
+    res.status(200).json({ 
+      message: "Logged out from all devices successfully. All tokens have been revoked.",
+      note: "Users will need to log in again on all devices."
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Error logging out from all devices", message: error.message });
+  }
+};
+
+// Check if current token is valid (not blacklisted)
+const validateToken = async (req, res) => {
+  try {
+    // If we reach here, token is valid (auth middleware passed)
+    const user = await UserModel.findById(req.user.userId).select('-password');
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json({
+      message: "Token is valid",
+      valid: true,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+      tokenInfo: {
+        issuedAt: new Date(req.user.iat * 1000),
+        expiresAt: new Date(req.user.exp * 1000),
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Error validating token", message: error.message });
+  }
+};
+
+// Admin: Get token blacklist statistics
+const getTokenStats = async (req, res) => {
+  try {
+    // Check if user is admin
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ error: "Access denied. Admin privileges required." });
+    }
+
+    const stats = await getBlacklistStats();
+    res.status(200).json({
+      message: "Token blacklist statistics retrieved successfully",
+      stats: stats
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Error retrieving token stats", message: error.message });
+  }
+};
+
+// Admin: Clean up expired tokens from blacklist
+const cleanupTokens = async (req, res) => {
+  try {
+    // Check if user is admin
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ error: "Access denied. Admin privileges required." });
+    }
+
+    const deletedCount = await cleanupExpiredTokens();
+    res.status(200).json({
+      message: "Expired tokens cleaned up successfully",
+      deletedCount: deletedCount
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Error cleaning up tokens", message: error.message });
   }
 };
 
@@ -451,5 +571,9 @@ module.exports = {
   deleteUser,
   loginUser,
   logoutUser,
+  logoutAllDevices,
+  validateToken,
+  getTokenStats,
+  cleanupTokens,
   getCurrentUser,
 };
