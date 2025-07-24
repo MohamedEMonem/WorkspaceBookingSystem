@@ -1,12 +1,9 @@
 /** @type {import("mongoose").Model<any>} */
-const UserModel = require("../models/userModel");
-const express = require("express");
-const app = express();
+const {UserModel} = require("../models/userModel");
 /** @type {import("mongoose").Model<any>} */
 
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const e = require("express");
 
 const getAllUsers = async (req, res) => {
   try {
