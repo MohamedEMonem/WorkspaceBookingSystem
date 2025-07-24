@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { auth, authAdmin } = require("../middleware/auth");
 const {
   getAllUsers,
   createUser,
@@ -8,31 +9,36 @@ const {
   patchUser,
   deleteUser,
   loginUser,
-  logoutUser
+  logoutUser,
+  getCurrentUser,
 } = require("../controller/userController");
 
-// GET /users - Get all users
-router.get("/", getAllUsers);
-
-// POST /users/login - Log in a user
+// Public routes (no authentication required)
 router.post("/login", loginUser);
-
-// POST /users/logout - Log out a user
-router.post("/logout", logoutUser);
-
-// POST /users/signup - Create a new user
 router.post("/signup", createUser);
 
+// Protected routes requiring authentication
+// GET /users/me - Get current authenticated user info
+router.get("/me", auth, getCurrentUser);
+
+// Admin-only routes
+// GET /users - Get all users (admin only)
+router.get("/", auth, authAdmin, getAllUsers);
+
+// User-specific routes (user can access own data, admin can access any)
 // GET /users/:id - Get a single user by ID
-router.get("/:id", getUserById);
+router.get("/:id", auth, getUserById);
 
 // PUT /users/:id - Update a user by ID
-router.put("/:id", updateUser);
+router.put("/:id", auth, updateUser);
 
 // PATCH /users/:id - Partially update a user by ID
-router.patch("/:id", patchUser);
+router.patch("/:id", auth, patchUser);
 
 // DELETE /users/:id - Delete a user by ID
-router.delete("/:id", deleteUser);
+router.delete("/:id", auth, deleteUser);
+
+// POST /users/logout - Log out a user
+router.post("/logout", auth, logoutUser);
 
 module.exports = router;

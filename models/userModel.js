@@ -17,10 +17,6 @@ const usersSchema = mongoose.Schema({
   phone: { type: String, required: true, unique: true, trim: true },
   gender: { type: String, enum: ["male", "female"], default: "other" },
   birthday: { type: Date }, // Changed from Date to String to avoid timezone issues
-  token: {
-    type: String,
-    default: null,
-  },
   password: {
     type: String,
     required: true,

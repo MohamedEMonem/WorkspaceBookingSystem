@@ -1,38 +1,42 @@
-/** @type {import("mongoose").Model<any>} */
-const {UserModel} = require("../models/userModel");
-/** @type {import("mongoose").Model<any>} */
-
+const { UserModel } = require("../models/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+const JWT_SECRET = process.env.JWT_SECRET;
+
+function saltingString(str) {
+  let sum = 0;
+  for (let i = 0; i < str.length; i++) {
+    const charCode = str.charCodeAt(i);
+    const shifted = charCode << i % 8;
+    sum += shifted;
+  }
+  return sum;
+}
+
+// GET /users - Admin only
 const getAllUsers = async (req, res) => {
   try {
-    const { token } = req.headers;
-
-    // Validate token
-    if (!token) {
-      return res.status(401).json({ error: "Token is required" });
+    // Check if user is admin
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ error: "Access denied. Admin privileges required." });
     }
 
-    // Check if user with this token exists
-    const userWithToken = await UserModel.findOne({ token });
-    if (!userWithToken) {
-      return res.status(401).json({ error: "Invalid or expired token" });
-    }
-    if (userWithToken.role !== "admin") {
-      return res.status(403).json({ error: "Access denied" });
-    } else {
-      const users = await UserModel.find({});
-      res.status(200).json(users);
-    }
+    const users = await UserModel.find({}).select('-password');
+    res.status(200).json({
+      message: "Users retrieved successfully",
+      users: users,
+      count: users.length
+    });
   } catch (error) {
-    res.status(500).json({ error: "Error fetching users" });
+    res.status(500).json({ error: "Error fetching users", message: error.message });
   }
 };
 
 const createUser = async (req, res) => {
   try {
     const { email, name, phone, gender, birthday, role, password } = req.body;
+    
     // Check if user already exists
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
@@ -44,333 +48,308 @@ const createUser = async (req, res) => {
     if (existingPhone) {
       return res.status(400).json({ error: "Phone number already exists" });
     }
+
     // Validate required fields
-    if (
-      !email ||
-      !name ||
-      !phone ||
-      !gender ||
-      !birthday ||
-      !role ||
-      !password
-    ) {
+    if (!email || !name || !phone || !gender || !birthday || !role || !password) {
       return res.status(400).json({ error: "All fields are required" });
-    } else if (email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/) === null) {
-      return res.status(400).json({ error: "Invalid email format" });
-    } else if (phone.match(/^\d{11}$/) === null) {
-      return res.status(400).json({ error: "Invalid phone number format" });
-    } else if (password.length < 6) {
-      return res
-        .status(400)
-        .json({ error: "Password must be at least 6 characters" });
-    } else if (name.length < 3) {
-      return res
-        .status(400)
-        .json({ error: "Name must be at least 3 characters" });
-    } else if (phone.length < 11) {
-      return res
-        .status(400)
-        .json({ error: "Phone must be at least 11 characters" });
-    } else if (gender.length < 4) {
-      return res
-        .status(400)
-        .json({ error: "Gender must be at least 4 characters" });
-    } else if ((role === "admin")) {
-      return res
-        .status(400)
-        .json({ error: "Role must be either 'owner', or 'user'" });
-    } else {
-      // Hash the password
-      const saltRounds = 10;
-      const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-      // Create JWT token using email + timestamp as secret
-      const token = jwt.sign({ email: email, role: role }, email + Date.now(), {
-        expiresIn: "5D",
-      });
-
-      const newUser = new UserModel({
-        name,
-        email,
-        phone,
-        gender,
-        birthday, // Store birthday as string (e.g., "01-01-2001")
-        role, // Use 'role' directly, not nested under authorization
-        password: hashedPassword, // Use 'password' field, not 'hashedPassword'
-        token,
-      });
-
-      await newUser.save();
-      res.status(201).json({
-        message: "User created successfully",
-        token: token,
-        user: {
-          id: newUser._id,
-          name: newUser.name,
-          email: newUser.email,
-          role: newUser.role, // Access role directly
-        },
-      });
     }
+
+    // Validation checks
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+    if (!phone.match(/^\d{11}$/)) {
+      return res.status(400).json({ error: "Invalid phone number format" });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
+    if (name.length < 3) {
+      return res.status(400).json({ error: "Name must be at least 3 characters" });
+    }
+    if (gender.length < 4) {
+      return res.status(400).json({ error: "Gender must be at least 4 characters" });
+    }
+    if (!["admin", "owner", "user"].includes(role)) {
+      return res.status(400).json({ error: "Role must be 'admin', 'owner', or 'user'" });
+    }
+
+    // Hash the password
+    const saltRounds = (saltingString(email) % 10) + 5;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Create user first
+    const newUser = new UserModel({
+      name,
+      email,
+      phone,
+      gender,
+      birthday,
+      role,
+      password: hashedPassword,
+    });
+    
+    await newUser.save();
+
+    // Create JWT token after user is created
+    const token = jwt.sign(
+      { userId: newUser._id, email: email, role: role },
+      JWT_SECRET,
+      { expiresIn: "5D" }
+    );
+
+    res.status(201).json({
+      message: "User created successfully",
+      token: token,
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+      },
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
+// GET /users/:id - User can get their own data, admin can get any user data
 const getUserById = async (req, res) => {
   try {
-    const { token } = req.headers;
-    // Validate token
-    if (!token) {
-      return res.status(401).json({ error: "Token is required" });
+    const requestedUserId = req.params.id;
+    const currentUserId = req.user.userId;
+    const currentUserRole = req.user.role;
+
+    // Check authorization: user can access their own data, admin can access any data
+    if (currentUserRole !== "admin" && requestedUserId !== currentUserId) {
+      return res.status(403).json({ 
+        error: "Access denied. You can only access your own profile." 
+      });
     }
 
-    // Check if user with this token exists
-    const userWithToken = await UserModel.findOne({ token });
-    if (!userWithToken) {
-      return res.status(401).json({ error: "Invalid or expired token" });
+    const user = await UserModel.findById(requestedUserId).select('-password');
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
-    if (userWithToken.id === req.params.id) {
-      const user = await UserModel.findById(userWithToken._id);
-      res.status(200).json(user);
-    } else if (userWithToken.role === "admin") {
-      const user = await UserModel.findById(req.params.id);
-      if (!user) {
-        return res.status(404).json({ error: "User not found" });
-      }
-      res.status(200).json(user);
-    } else if (userWithToken.role !== "admin") {
-      return res.status(403).json({ message: "Access denied" });
-    }
+
+    res.status(200).json({
+      message: "User retrieved successfully",
+      user: user
+    });
   } catch (error) {
-    res.status(500).json({ error: "Error fetching user" });
+    res.status(500).json({ error: "Error fetching user", message: error.message });
   }
 };
 
+// PUT /users/:id - User can update their own data, admin can update any user data
 const updateUser = async (req, res) => {
   try {
-    const { token } = req.headers;
-    // Validate token
-    if (!token) {
-      return res.status(401).json({ error: "Token is required" });
-    }
+    const targetUserId = req.params.id;
+    const currentUserId = req.user.userId;
+    const currentUserRole = req.user.role;
 
-    // Check if user with this token exists
-    const userWithToken = await UserModel.findOne({ token });
-    if (!userWithToken) {
-      return res.status(401).json({ error: "Invalid or expired token" });
-    }
-
-    // Check if user is trying to update themselves or if they are admin
-    if (userWithToken._id.toString() === req.params.id) {
-      // User updating their own profile
-      const { name, phone, gender, birthday, password } = req.body;
-      
-      let updateData = {};
-      if (name) updateData.name = name;
-      if (phone) updateData.phone = phone;
-      if (gender) updateData.gender = gender;
-      if (birthday) updateData.birthday = birthday;
-      
-      // Hash password if provided
-      if (password) {
-        const saltRounds = 10;
-        updateData.password = await bcrypt.hash(password, saltRounds);
-      }
-
-      const updatedUser = await UserModel.findByIdAndUpdate(
-        userWithToken._id,
-        updateData,
-        { new: true }
-      );
-      
-      res.status(200).json({
-        message: "User updated successfully",
-        user: {
-          id: updatedUser._id,
-          name: updatedUser.name,
-          email: updatedUser.email,
-          phone: updatedUser.phone,
-          gender: updatedUser.gender,
-          birthday: updatedUser.birthday,
-          role: updatedUser.role,
-        },
+    // Check authorization: user can update their own data, admin can update any data
+    if (currentUserRole !== "admin" && targetUserId !== currentUserId) {
+      return res.status(403).json({ 
+        error: "Access denied. You can only update your own profile." 
       });
-    } else if (userWithToken.role === "admin") {
-      // Admin updating another user
-      const userToUpdate = await UserModel.findById(req.params.id);
-      if (!userToUpdate) {
+    }
+
+    const { name, phone, gender, birthday, role, password } = req.body;
+
+    // Validate phone uniqueness if provided
+    if (phone) {
+      const existingPhone = await UserModel.findOne({ 
+        phone, 
+        _id: { $ne: targetUserId } 
+      });
+      if (existingPhone) {
+        return res.status(400).json({ error: "Phone number already exists" });
+      }
+    }
+
+    let updateData = {};
+    if (name) {
+      if (name.length < 3) {
+        return res.status(400).json({ error: "Name must be at least 3 characters" });
+      }
+      updateData.name = name;
+    }
+    if (phone) {
+      if (!phone.match(/^\d{11}$/)) {
+        return res.status(400).json({ error: "Invalid phone number format" });
+      }
+      updateData.phone = phone;
+    }
+    if (gender) {
+      if (gender.length < 4) {
+        return res.status(400).json({ error: "Gender must be at least 4 characters" });
+      }
+      updateData.gender = gender;
+    }
+    if (birthday) updateData.birthday = birthday;
+    
+    // Only admins can change roles, and only to valid roles
+    if (role) {
+      if (currentUserRole !== "admin") {
+        return res.status(403).json({ error: "Only admins can change user roles" });
+      }
+      if (!["admin", "owner", "user"].includes(role)) {
+        return res.status(400).json({ error: "Invalid role. Must be 'admin', 'owner', or 'user'" });
+      }
+      updateData.role = role;
+    }
+
+    // Hash password if provided
+    if (password) {
+      if (password.length < 6) {
+        return res.status(400).json({ error: "Password must be at least 6 characters" });
+      }
+      // Get user's email for dynamic salting
+      const user = await UserModel.findById(targetUserId);
+      if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
-
-      const { name, phone, gender, birthday, role, password } = req.body;
-      
-      let updateData = {};
-      if (name) updateData.name = name;
-      if (phone) updateData.phone = phone;
-      if (gender) updateData.gender = gender;
-      if (birthday) updateData.birthday = birthday;
-      if (role) updateData.role = role;
-      
-      // Hash password if provided
-      if (password) {
-        const saltRounds = 10;
-        updateData.password = await bcrypt.hash(password, saltRounds);
-      }
-
-      const updatedUser = await UserModel.findByIdAndUpdate(
-        req.params.id,
-        updateData,
-        { new: true }
-      );
-      
-      res.status(200).json({
-        message: "User updated successfully",
-        user: {
-          id: updatedUser._id,
-          name: updatedUser.name,
-          email: updatedUser.email,
-          phone: updatedUser.phone,
-          gender: updatedUser.gender,
-          birthday: updatedUser.birthday,
-          role: updatedUser.role,
-        },
-      });
-    } else {
-      // Not admin and not updating own account
-      return res.status(403).json({ error: "Access denied" });
+      const saltRounds = (saltingString(user.email) % 10) + 5;
+      updateData.password = await bcrypt.hash(password, saltRounds);
     }
+
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      targetUserId,
+      updateData,
+      { new: true }
+    ).select('-password');
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json({
+      message: "User updated successfully",
+      user: updatedUser,
+    });
   } catch (error) {
     res.status(500).json({ error: "Error updating user", message: error.message });
   }
 };
 
+// PATCH /users/:id - User can patch their own data, admin can patch any user data
 const patchUser = async (req, res) => {
   try {
-    const { token } = req.headers;
-    // Validate token
-    if (!token) {
-      return res.status(401).json({ error: "Token is required" });
-    }
+    const targetUserId = req.params.id;
+    const currentUserId = req.user.userId;
+    const currentUserRole = req.user.role;
 
-    // Check if user with this token exists
-    const userWithToken = await UserModel.findOne({ token });
-    if (!userWithToken) {
-      return res.status(401).json({ error: "Invalid or expired token" });
-    }
-
-    // Check if user is trying to patch themselves or if they are admin
-    if (userWithToken._id.toString() === req.params.id) {
-      // User patching their own profile (only specific fields allowed)
-      const { name, phone, gender, birthday } = req.body;
-      
-      let updateData = {};
-      if (name) updateData.name = name;
-      if (phone) updateData.phone = phone;
-      if (gender) updateData.gender = gender;
-      if (birthday) updateData.birthday = birthday;
-
-      // Check if there's anything to update
-      if (Object.keys(updateData).length === 0) {
-        return res.status(400).json({ error: "No valid fields provided for update" });
-      }
-
-      const patchedUser = await UserModel.findByIdAndUpdate(
-        userWithToken._id,
-        { $set: updateData },
-        { new: true }
-      );
-      
-      res.status(200).json({
-        message: "User patched successfully",
-        user: {
-          id: patchedUser._id,
-          name: patchedUser.name,
-          email: patchedUser.email,
-          phone: patchedUser.phone,
-          gender: patchedUser.gender,
-          birthday: patchedUser.birthday,
-          role: patchedUser.role,
-        },
+    // Check authorization: user can patch their own data, admin can patch any data
+    if (currentUserRole !== "admin" && targetUserId !== currentUserId) {
+      return res.status(403).json({ 
+        error: "Access denied. You can only update your own profile." 
       });
-    } else if (userWithToken.role === "admin") {
-      // Admin patching another user
-      const userToPatch = await UserModel.findById(req.params.id);
-      if (!userToPatch) {
-        return res.status(404).json({ error: "User not found" });
-      }
-
-      const { name, phone, gender, birthday, role } = req.body;
-      
-      let updateData = {};
-      if (name) updateData.name = name;
-      if (phone) updateData.phone = phone;
-      if (gender) updateData.gender = gender;
-      if (birthday) updateData.birthday = birthday;
-      if (role) updateData.role = role;
-
-      // Check if there's anything to update
-      if (Object.keys(updateData).length === 0) {
-        return res.status(400).json({ error: "No valid fields provided for update" });
-      }
-
-      const patchedUser = await UserModel.findByIdAndUpdate(
-        req.params.id,
-        { $set: updateData },
-        { new: true }
-      );
-      
-      res.status(200).json({
-        message: "User patched successfully",
-        user: {
-          id: patchedUser._id,
-          name: patchedUser.name,
-          email: patchedUser.email,
-          phone: patchedUser.phone,
-          gender: patchedUser.gender,
-          birthday: patchedUser.birthday,
-          role: patchedUser.role,
-        },
-      });
-    } else {
-      // Not admin and not patching own account
-      return res.status(403).json({ error: "Access denied" });
     }
+
+    const { name, phone, gender, birthday, role } = req.body;
+
+    // Validate phone uniqueness if provided
+    if (phone) {
+      const existingPhone = await UserModel.findOne({ 
+        phone, 
+        _id: { $ne: targetUserId } 
+      });
+      if (existingPhone) {
+        return res.status(400).json({ error: "Phone number already exists" });
+      }
+    }
+
+    let updateData = {};
+    if (name) {
+      if (name.length < 3) {
+        return res.status(400).json({ error: "Name must be at least 3 characters" });
+      }
+      updateData.name = name;
+    }
+    if (phone) {
+      if (!phone.match(/^\d{11}$/)) {
+        return res.status(400).json({ error: "Invalid phone number format" });
+      }
+      updateData.phone = phone;
+    }
+    if (gender) {
+      if (gender.length < 4) {
+        return res.status(400).json({ error: "Gender must be at least 4 characters" });
+      }
+      updateData.gender = gender;
+    }
+    if (birthday) updateData.birthday = birthday;
+    
+    // Only admins can change roles, and only to valid roles
+    if (role) {
+      if (currentUserRole !== "admin") {
+        return res.status(403).json({ error: "Only admins can change user roles" });
+      }
+      if (!["admin", "owner", "user"].includes(role)) {
+        return res.status(400).json({ error: "Invalid role. Must be 'admin', 'owner', or 'user'" });
+      }
+      updateData.role = role;
+    }
+
+    // Check if there's anything to update
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ error: "No valid fields provided for update" });
+    }
+
+    const patchedUser = await UserModel.findByIdAndUpdate(
+      targetUserId,
+      { $set: updateData },
+      { new: true }
+    ).select('-password');
+
+    if (!patchedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json({
+      message: "User patched successfully",
+      user: patchedUser,
+    });
   } catch (error) {
     res.status(500).json({ error: "Error patching user", message: error.message });
   }
 };
 
+// DELETE /users/:id - User can delete their own account, admin can delete any user
 const deleteUser = async (req, res) => {
   try {
-    const { token } = req.headers;
-    // Validate token
-    if (!token) {
-      return res.status(401).json({ error: "Token is required" });
+    const targetUserId = req.params.id;
+    const currentUserId = req.user.userId;
+    const currentUserRole = req.user.role;
+
+    // Check authorization: user can delete their own account, admin can delete any account
+    if (currentUserRole !== "admin" && targetUserId !== currentUserId) {
+      return res.status(403).json({ 
+        error: "Access denied. You can only delete your own account." 
+      });
     }
 
-    // Check if user with this token exists
-    const userWithToken = await UserModel.findOne({ token });
-    if (!userWithToken) {
-      return res.status(401).json({ error: "Invalid or expired token" });
+    // Prevent admin from deleting themselves (optional safety check)
+    if (currentUserRole === "admin" && targetUserId === currentUserId) {
+      return res.status(400).json({ 
+        error: "Admins cannot delete their own account. Contact another admin." 
+      });
     }
-    
-    // Check if user is trying to delete themselves
-    if (userWithToken._id.toString() === req.params.id) {
-      await UserModel.findByIdAndDelete(userWithToken._id);
-      res.status(200).json({ message: "User deleted successfully" });
-    } else if (userWithToken.role === "admin") {
-      // Admin can delete other users
-      const userToDelete = await UserModel.findById(req.params.id);
-      if (!userToDelete) {
-        return res.status(404).json({ error: "User not found" });
+
+    const deletedUser = await UserModel.findByIdAndDelete(targetUserId);
+    if (!deletedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json({ 
+      message: "User deleted successfully",
+      deletedUser: {
+        id: deletedUser._id,
+        name: deletedUser.name,
+        email: deletedUser.email
       }
-      await UserModel.findByIdAndDelete(req.params.id);
-      res.status(200).json({ message: "User deleted successfully" });
-    } else {
-      // Not admin and not deleting own account
-      return res.status(403).json({ error: "Access denied" });
-    }
+    });
   } catch (error) {
     res.status(500).json({ error: "Error deleting user", message: error.message });
   }
@@ -386,10 +365,7 @@ const loginUser = async (req, res) => {
     }
 
     // Find user by email
-    console.log("Looking for user with email:", email);
     const user = await UserModel.findOne({ email });
-    console.log("User found:", user ? "Yes" : "No");
-
     if (!user) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
@@ -400,17 +376,13 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
-    // Generate JWT token using email + timestamp as secret
+    // Generate JWT token
     const token = jwt.sign(
-      {
-        userId: user._id,
-        email: user.email,
-        role: user.role,
-      },
-      email + Date.now(),
+      { userId: user._id, email: user.email, role: user.role },
+      JWT_SECRET,
       { expiresIn: "5D" }
     );
-    await UserModel.updateOne({ _id: user._id }, { $set: { token: token } });
+
     res.status(200).json({
       message: "User logged in successfully",
       token: token,
@@ -422,30 +394,49 @@ const loginUser = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Login error:", error);
     res.status(500).json({ error: error.message });
   }
 };
 
+// Get current authenticated user info
+const getCurrentUser = async (req, res) => {
+  try {
+    // req.user is set by auth middleware
+    const user = await UserModel.findById(req.user.userId).select('-password');
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json({
+      message: "User authenticated successfully",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone,
+        gender: user.gender,
+        birthday: user.birthday,
+      },
+      authInfo: {
+        role: req.user.role,
+        userId: req.user.userId,
+        email: req.user.email,
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching user info", message: error.message });
+  }
+};
+
+// No longer needed since we're using JWT middleware
 const logoutUser = async (req, res) => {
-  try{
-    const { token } = req.headers;
-
-    // Validate token
-    if (!token) {
-      return res.status(401).json({ error: "Token is required" });
-    }
-
-    // Check if user with this token exists
-    const userWithToken = await UserModel.findOne({ token });
-    if (!userWithToken) {
-      return res.status(401).json({ error: "Invalid or expired token" });
-    }
-
-    // Clear the token from the user's record
-    await UserModel.updateOne({ _id: userWithToken._id }, { $set: { token: null } });
-
-    res.status(200).json({ message: "User logged out successfully" });
+  try {
+    // With JWT, logout is handled client-side by removing the token
+    // Optionally, you could implement a blacklist for tokens
+    res.status(200).json({ 
+      message: "User logged out successfully." 
+    });
   } catch (error) {
     res.status(500).json({ error: "Error logging out user", message: error.message });
   }
@@ -459,5 +450,6 @@ module.exports = {
   patchUser,
   deleteUser,
   loginUser,
-  logoutUser
+  logoutUser,
+  getCurrentUser,
 };

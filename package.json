@@ -16,6 +16,7 @@
     "@auth/express": "^0.11.0",
     "bcryptjs": "^3.0.2",
     "bson": "^6.10.4",
+    "dotenv": "^17.2.0",
     "express": "^5.1.0",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
