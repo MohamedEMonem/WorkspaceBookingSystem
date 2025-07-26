@@ -27,6 +27,11 @@ const {
 router.post("/login", loginUser);
 router.post("/signup", createUser);
 
+// Test user creation routes (for development/testing only)
+router.post("/create-test-user", createUser);
+router.post("/create-test-owner", createUser);
+router.post("/create-test-admin", createUser);
+
 // Invite-based routes (no authentication required for verification and signup)
 router.post("/verify-invite", verifyInvite);
 router.post("/signup-with-invite", signupWithInvite);
