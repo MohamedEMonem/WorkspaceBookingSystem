@@ -19,6 +19,7 @@ const auth = async (req, res, next) => {
     req.token = token; // attach token to req for potential blacklisting
     res.locals.user = decoded; // also attach to res.locals for templates
     next();
+    
   } catch (err) {
     if (err.name === 'TokenExpiredError') {
       return res.status(401).json({ error: "Token has expired" });
