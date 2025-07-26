@@ -3,10 +3,6 @@ const router = express.Router();
 const { 
   auth, 
   authAdmin, 
-  authOwner, 
-  authAdminOrOwner, 
-  authUserAccess, 
-  authUserModify 
 } = require("../middleware/auth");
 const {
   getAllUsers,
@@ -41,16 +37,16 @@ router.get("/me", auth, getCurrentUser);
 
 // User-specific routes with proper authorization
 // GET /users/:id - Get a single user by ID (user can access own data, admin can access any)
-router.get("/:id", auth, authUserAccess, getUserById);
+router.get("/:id", auth, getUserById);
 
 // PUT /users/:id - Update a user by ID (user can update own data, admin/owner can update any)
-router.put("/:id", auth, authUserModify, updateUser);
+router.put("/:id", auth, updateUser);
 
 // PATCH /users/:id - Partially update a user by ID (user can patch own data, admin/owner can patch any)
-router.patch("/:id", auth, authUserModify, patchUser);
+router.patch("/:id", auth, patchUser);
 
 // DELETE /users/:id - Delete a user by ID (user can delete own account, admin/owner can delete any)
-router.delete("/:id", auth, authUserModify, deleteUser);
+router.delete("/:id", auth, deleteUser);
 
 // Token management routes
 // POST /users/logout - Log out current user (blacklist current token)

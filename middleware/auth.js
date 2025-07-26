@@ -52,64 +52,8 @@ const authOwner = (req, res, next) => {
   next();
 };
 
-// Middleware for admin or owner access
-const authAdminOrOwner = (req, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: "Authentication required" });
-  }
-  
-  if (!["admin", "owner"].includes(req.user.role)) {
-    return res.status(403).json({ error: "Access denied. Admin or Owner required." });
-  }
-  
-  next();
-};
-
-// Middleware to check if user can access a specific user resource
-const authUserAccess = (req, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: "Authentication required" });
-  }
-  
-  const targetUserId = req.params.id;
-  const currentUserId = req.user.userId;
-  const currentUserRole = req.user.role;
-  
-  // Admin can access any user, users can only access themselves
-  if (currentUserRole === "admin" || targetUserId === currentUserId) {
-    return next();
-  }
-  
-  return res.status(403).json({ 
-    error: "Access denied. You can only access your own profile." 
-  });
-};
-
-// Middleware to check if user can modify a specific user resource
-const authUserModify = (req, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ error: "Authentication required" });
-  }
-  
-  const targetUserId = req.params.id;
-  const currentUserId = req.user.userId;
-  const currentUserRole = req.user.role;
-  
-  // Admin and owner can modify any user, users can only modify themselves
-  if (["admin", "owner"].includes(currentUserRole) || targetUserId === currentUserId) {
-    return next();
-  }
-  
-  return res.status(403).json({ 
-    error: "Access denied. You can only modify your own profile." 
-  });
-};
-
 module.exports = { 
   auth,
   authAdmin,
-  authOwner,
-  authAdminOrOwner,
-  authUserAccess,
-  authUserModify
+  authOwner
 };
