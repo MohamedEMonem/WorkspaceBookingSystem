@@ -16,7 +16,7 @@ const {
   getBookingAnalytics,
   modifyBooking,
   deleteBooking
-} = require("../controllers/bookingController");
+} = require("../controller/bookingController");
 const { auth, authAdmin, authOwner } = require("../middleware/auth");
 
 // ========== USER ROUTES ==========
