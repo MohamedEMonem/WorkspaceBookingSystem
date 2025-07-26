@@ -1,5 +1,5 @@
 const { Booking } = require("../models/bookingModel");
-const { User } = require("../models/userModel");
+const { UserModel } = require("../models/userModel");
 
 // User Routes - Book workspace
 const createBooking = async (req, res) => {
@@ -8,7 +8,7 @@ const createBooking = async (req, res) => {
     const userId = req.user.userId;
 
     // Check if user exists
-    const user = await User.findById(userId);
+    const user = await UserModel.findById(userId);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
