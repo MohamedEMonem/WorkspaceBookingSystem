@@ -1,5 +1,6 @@
 const { Booking } = require("../models/bookingModel");
 const { UserModel } = require("../models/userModel");
+const {workspacesModel} = require("../models/workspacesModel");
 
 // User Routes - Book workspace
 const createBooking = async (req, res) => {
@@ -173,8 +174,17 @@ const cancelBooking = async (req, res) => {
 const getAllBookings = async (req, res) => {
   try {
     const { status, date, space, page = 1, limit = 20 } = req.query;
+    const ownerId = req.user.userId;
 
-    const filter = {};
+    // First, get all workspaces owned by this owner
+    const ownerWorkspaces = await workspacesModel.find({ owner: ownerId }).select('_id');
+    const workspaceIds = ownerWorkspaces.map(workspace => workspace._id);
+
+    // Build the filter
+    const filter = {
+      space: { $in: workspaceIds } // Only include bookings for owner's workspaces
+    };
+
     if (status) filter.status = status;
     if (date) filter.date = new Date(date);
     if (space) filter.space = space;

@@ -7,6 +7,11 @@ const workspaceSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  workspaceOwner: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+  },
+
   location: {
     type: String,
     trim: true,
