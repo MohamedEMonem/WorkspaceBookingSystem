@@ -4,8 +4,11 @@ const {
   auth, 
   authAdmin, 
 } = require("../middleware/auth");
+const DashboardRoutes = require("./Dashboard");
+const bookingRoutes = require("./booking");
+
 const {
-  getAllUsers,
+  // getAllUsers,
   createUser,
   getUserById,
   updateUser,
@@ -18,10 +21,13 @@ const {
   cleanupTokens,
   getCurrentUser,
   adminInvite,
-  getSystemStats,
+  // getSystemStats,
   verifyInvite,
   signupWithInvite,
 } = require("../controller/userController");
+
+router.use("/booking",auth, bookingRoutes);
+router.use("/dashboard",auth, authAdmin, DashboardRoutes);
 
 // Public routes (no authentication required)
 router.post("/login", loginUser);
@@ -58,17 +64,14 @@ router.post("/logout-all/:id", auth, authAdmin, logoutAllDevices);
 
 // Admin-only routes
 // GET /users - Get all users (admin only)
-router.get("/", auth, authAdmin, getAllUsers);
+// router.get("/", auth, authAdmin, getAllUsers);//Moved to Dashboard.js
 
 // GET /users/admin/stats - Get system statistics (admin only)
-router.get("/admin/stats", auth, authAdmin, getSystemStats);
 
 // GET /users/admin/token-stats - Get token blacklist statistics (admin only)
 router.get("/admin/token-stats", auth, authAdmin, getTokenStats);
 
 // POST /users/admin/cleanup-tokens - Clean up expired tokens (admin only)
-router.post("/admin/cleanup-tokens", auth, authAdmin, cleanupTokens);
-
 // POST /users/admin/invite - Create admin invite (admin only)
 router.post("/admin/invite", auth, authAdmin, adminInvite);
 

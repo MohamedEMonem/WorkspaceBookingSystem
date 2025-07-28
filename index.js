@@ -9,8 +9,7 @@ app.use(express.json());
 const usersRoutes = require("./routes/users");
 const workspacesRoutes = require("./routes/workspace");
 const sloutionsRoutes = require("./routes/sloutions");
-const bookingRoutes = require("./routes/booking");
-const adminDashboardRoutes = require("./routes/adminDashboard");
+// const bookingRoutes = require("./routes/booking");
 
 //mongoose
 const mongoose = require("mongoose");
@@ -19,8 +18,8 @@ const mongoose = require("mongoose");
 app.use("/users", usersRoutes);
 app.use("/workspaces", workspacesRoutes);
 app.use("/sloutions", sloutionsRoutes);
-app.use("/booking", bookingRoutes);
-app.use("/adminDashboard", adminDashboardRoutes);
+// app.use("/booking", bookingRoutes);
+// app.use("/adminDashboard", DashboardRoutes);
 app.use((req, res, next) => {
   res.status(404).json({ error: "Route not found" });
 });
