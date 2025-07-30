@@ -7,8 +7,8 @@ export interface User {
   birthday?: Date;
   role: 'admin' | 'owner' | 'user';
   history?: any[];
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface LoginRequest {

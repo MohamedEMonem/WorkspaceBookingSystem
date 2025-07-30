@@ -1,5 +1,4 @@
 export interface Booking {
-  _id?: string;
   user: string; // ObjectId reference to User
   space: string; // ObjectId reference to Workspace
   date: Date;
