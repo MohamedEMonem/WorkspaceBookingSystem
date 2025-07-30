@@ -46,6 +46,8 @@ export const API_ENDPOINTS = {
   // Solutions endpoints
   SOLUTIONS: {
     BASE: '/sloutions',
+    GET_ALL: '/sloutions/structure',
+    GET_BY_SUBSOLUTION: '/sloutions/:subsolution',
   },
 
   // Dashboard endpoints (ignored as requested)
