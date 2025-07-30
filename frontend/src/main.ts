@@ -4,5 +4,5 @@ import { App } from './app/app';
 import { LoginComponent } from './app/pages/login/login.component';
 import { RegisterComponent } from './app/pages/register/register.component';
 
-bootstrapApplication(LoginComponent, appConfig)
+bootstrapApplication(RegisterComponent, appConfig)
   .catch((err) => console.error(err));
