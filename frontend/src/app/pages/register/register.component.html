@@ -1,8 +1,8 @@
-<div class="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
+<div class="min-h-screen bg-gradient-to-br from-teal-50 to-cyan-100 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
   <div class="max-w-md w-full space-y-8">
     <!-- Header -->
     <div class="text-center">
-      <div class="mx-auto h-12 w-12 bg-green-600 rounded-full flex items-center justify-center">
+      <div class="mx-auto h-12 w-12 rounded-full flex items-center justify-center" style="background-color: #009689;">
         <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
         </svg>
@@ -35,7 +35,8 @@
               type="text" 
               [(ngModel)]="registerData.firstName"
               required 
-              class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm transition duration-200"
+              class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 sm:text-sm transition duration-200"
+              style="--tw-ring-color: #009689; --tw-border-opacity: 1; border-color: #009689;"
               placeholder="Enter your first name"
               [class.border-red-500]="firstNameError"
             >
@@ -56,7 +57,8 @@
               type="text" 
               [(ngModel)]="registerData.lastName"
               required 
-              class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm transition duration-200"
+              class="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 sm:text-sm transition duration-200"
+              style="--tw-ring-color: #009689; --tw-border-opacity: 1; border-color: #009689;"
               placeholder="Enter your last name"
               [class.border-red-500]="lastNameError"
             >
@@ -85,7 +87,8 @@
               type="email" 
               [(ngModel)]="registerData.email"
               required 
-              class="appearance-none relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm transition duration-200"
+              class="appearance-none relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 sm:text-sm transition duration-200"
+              style="--tw-ring-color: #009689; --tw-border-opacity: 1; border-color: #009689;"
               placeholder="Enter your email"
               [class.border-red-500]="emailError"
             >
@@ -113,7 +116,8 @@
               name="phone" 
               type="tel" 
               [(ngModel)]="registerData.phone"
-              class="appearance-none relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm transition duration-200"
+              class="appearance-none relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 sm:text-sm transition duration-200"
+              style="--tw-ring-color: #009689; --tw-border-opacity: 1; border-color: #009689;"
               placeholder="Enter your phone number"
               [class.border-red-500]="phoneError"
             >
@@ -149,7 +153,8 @@
               [type]="showPassword ? 'text' : 'password'"
               [(ngModel)]="registerData.password"
               required 
-              class="appearance-none relative block w-full px-3 py-3 pl-10 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm transition duration-200"
+              class="appearance-none relative block w-full px-3 py-3 pl-10 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 sm:text-sm transition duration-200"
+              style="--tw-ring-color: #009689; --tw-border-opacity: 1; border-color: #009689;"
               placeholder="Create a password"
               [class.border-red-500]="passwordError"
             >
@@ -195,7 +200,8 @@
               [type]="showConfirmPassword ? 'text' : 'password'"
               [(ngModel)]="registerData.confirmPassword"
               required 
-              class="appearance-none relative block w-full px-3 py-3 pl-10 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm transition duration-200"
+              class="appearance-none relative block w-full px-3 py-3 pl-10 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 sm:text-sm transition duration-200"
+              style="--tw-ring-color: #009689; --tw-border-opacity: 1; border-color: #009689;"
               placeholder="Confirm your password"
               [class.border-red-500]="confirmPasswordError"
             >
@@ -233,16 +239,17 @@
           type="checkbox" 
           [(ngModel)]="registerData.acceptTerms"
           required
-          class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+          class="h-4 w-4 border-gray-300 rounded"
+          style="color: #009689; --tw-ring-color: #009689;"
           [class.border-red-500]="termsError"
         >
         <label for="terms" class="ml-2 block text-sm text-gray-900">
           I agree to the 
-          <a href="#" class="font-medium text-green-600 hover:text-green-500 transition duration-200">
+          <a href="#" class="font-medium transition duration-200" style="color: #009689;">
             Terms of Service
           </a>
           and 
-          <a href="#" class="font-medium text-green-600 hover:text-green-500 transition duration-200">
+          <a href="#" class="font-medium transition duration-200" style="color: #009689;">
             Privacy Policy
           </a>
         </label>
@@ -258,7 +265,8 @@
         <button 
           type="submit" 
           [disabled]="isLoading"
-          class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+          class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
+          style="background-color: #009689; --tw-ring-color: #009689;"
         >
                      @if (isLoading) {
              <span class="absolute left-0 inset-y-0 flex items-center pl-3">
@@ -277,37 +285,11 @@
         </button>
       </div>
 
-      <!-- Divider -->
-      <div class="relative">
-        <div class="absolute inset-0 flex items-center">
-          <div class="w-full border-t border-gray-300"></div>
-        </div>
-        <div class="relative flex justify-center text-sm">
-          <span class="px-2 bg-gradient-to-br from-green-50 to-emerald-100 text-gray-500">
-            Or continue with
-          </span>
-        </div>
-      </div>
-
-      <!-- Social Registration Buttons -->
-      <div class="grid grid-cols-2 gap-3">
-        @for (provider of socialProviders; track provider.name) {
-          <button 
-            type="button"
-            (click)="socialLogin(provider.name)"
-            class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-200"
-          >
-            <svg class="h-5 w-5" [innerHTML]="provider.icon"></svg>
-            <span class="ml-2">{{ provider.name }}</span>
-          </button>
-        }
-      </div>
-
       <!-- Sign In Link -->
       <div class="text-center">
         <p class="text-sm text-gray-600">
           Already have an account? 
-          <a href="#" class="font-medium text-green-600 hover:text-green-500 transition duration-200">
+          <a href="#" class="font-medium transition duration-200" style="color: #009689;">
             Sign in
           </a>
         </p>
