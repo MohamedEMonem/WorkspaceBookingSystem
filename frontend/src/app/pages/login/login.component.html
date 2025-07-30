@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gradient-to-br from-teal-50 to-cyan-100 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen to-cyan-100 flex items-center justify-center px-4 sm:px-6 lg:px-8">
   <div class="max-w-md w-full space-y-8">
     <!-- Header -->
     <div class="text-center">
@@ -29,12 +29,12 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
               </svg>
             </div>
-            <input 
-              id="email" 
-              name="email" 
-              type="email" 
+            <input
+              id="email"
+              name="email"
+              type="email"
               [(ngModel)]="loginData.email"
-              required 
+              required
               class="appearance-none relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:z-10 sm:text-sm transition duration-200"
               style="--tw-ring-color: #009689; --tw-border-opacity: 1; border-color: #009689;"
               placeholder="Enter your email"
@@ -59,18 +59,18 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
               </svg>
             </div>
-            <input 
-              id="password" 
-              name="password" 
+            <input
+              id="password"
+              name="password"
               [type]="showPassword ? 'text' : 'password'"
               [(ngModel)]="loginData.password"
-              required 
+              required
               class="appearance-none relative block w-full px-3 py-3 pl-10 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:z-10 sm:text-sm transition duration-200"
               style="--tw-ring-color: #009689; --tw-border-opacity: 1; border-color: #009689;"
               placeholder="Enter your password"
               [class.border-red-500]="passwordError"
             >
-            <button 
+            <button
               type="button"
               (click)="togglePassword()"
               class="absolute inset-y-0 right-0 pr-3 flex items-center"
@@ -99,10 +99,10 @@
       <!-- Remember Me & Forgot Password -->
       <div class="flex items-center justify-between">
         <div class="flex items-center">
-          <input 
-            id="remember-me" 
-            name="remember-me" 
-            type="checkbox" 
+          <input
+            id="remember-me"
+            name="remember-me"
+            type="checkbox"
             [(ngModel)]="loginData.rememberMe"
                          class="h-4 w-4 border-gray-300 rounded"
              style="color: #009689; --tw-ring-color: #009689;"
@@ -121,8 +121,8 @@
 
       <!-- Submit Button -->
       <div>
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           [disabled]="isLoading"
                      class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition duration-200"
            style="background-color: #009689; --tw-ring-color: #009689;"
@@ -147,7 +147,7 @@
       <!-- Sign Up Link -->
       <div class="text-center">
         <p class="text-sm text-gray-600">
-          Don't have an account? 
+          Don't have an account?
           <a href="#" class="font-medium transition duration-200" style="color: #009689;">
             Sign up
           </a>
