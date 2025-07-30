@@ -26,7 +26,6 @@ export class HttpService {
     this.setLoading(true);
     const url = this.buildUrl(endpoint);
     const httpParams = this.buildParams(params);
-
     return this.http.get<ApiResponse<T>>(url, { 
       params: httpParams,
       headers: this.getHeaders()

@@ -1,11 +1,15 @@
-const workspacesModel = require("../models/workspacesModel");
+const { workspacesModel } = require("../models/workspacesModel");
 
 // GET /sloutions/:subsolution - Return all workspaces that offer the given subsolution, grouped by solution type
 const getWorkspacesBySubsolution = async (req, res) => {
   try {
     const { subsolution } = req.params;
     if (!subsolution) {
-      return res.status(400).json({ error: "Subsolution is required" });
+      return res.status(400).json({ 
+        success: false,
+        error: "Subsolution is required",
+        message: "Subsolution is required" 
+      });
     }
 
     const workspaces = await workspacesModel.find();
@@ -56,9 +60,17 @@ const getWorkspacesBySubsolution = async (req, res) => {
       }
     });
 
-    res.json(result);
+    res.json({
+      success: true,
+      data: result,
+      message: `Workspaces found for subsolution: ${subsolution}`
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ 
+      success: false,
+      error: err.message,
+      message: err.message 
+    });
   }
 };
 
@@ -94,9 +106,17 @@ const getAllSolutionsStructure = async (req, res) => {
       }
     });
 
-    res.json(result);
+    res.json({
+      success: true,
+      data: result,
+      message: "Solutions structure retrieved successfully"
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ 
+      success: false,
+      error: err.message,
+      message: err.message 
+    });
   }
 };
 

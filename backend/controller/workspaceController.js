@@ -1,25 +1,52 @@
-const workspacesModel = require("../models/workspacesModel");
+const { workspacesModel } = require("../models/workspacesModel");
 const mongoose = require("mongoose")
 //GET
 const getAllWorkspaces = async (req, res) => {
   try {
     const WorkspacesModels = await workspacesModel.find({});
-    res.status(200).json(WorkspacesModels);
+    res.status(200).json({
+      success: true,
+      data: WorkspacesModels,
+      message: "Workspaces fetched successfully"
+    });
   } catch (error) {
-    res.status(500).json({ error: "Error fetching WorkspacesModels" });
+    res.status(500).json({ 
+      success: false,
+      error: "Error fetching WorkspacesModels",
+      message: error.message 
+    });
   }
 };
 const getWorkspacesById = async (req, res) => {
    const {id}= req.params
    // Check if the ID is a valid MongoDB ObjectId
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ error: "Invalid Workspace ID" });
+    return res.status(400).json({ 
+      success: false,
+      error: "Invalid Workspace ID",
+      message: "Invalid Workspace ID" 
+    });
   }
   try {
     const WorkspacesModels = await workspacesModel.findById(id);
-    res.status(200).json(WorkspacesModels);
+    if (!WorkspacesModels) {
+      return res.status(404).json({
+        success: false,
+        error: "Workspace not found",
+        message: "Workspace not found"
+      });
+    }
+    res.status(200).json({
+      success: true,
+      data: WorkspacesModels,
+      message: "Workspace fetched successfully"
+    });
   } catch (error) {
-    res.status(500).json({ error: "Error fetching WorkspacesModel" });
+    res.status(500).json({ 
+      success: false,
+      error: "Error fetching WorkspacesModel",
+      message: error.message 
+    });
   }
 };
 //POST
@@ -27,9 +54,17 @@ const createWorkspaces = async (req, res) => {
     const newWorkspace =req.body
   try {
     const createdWorkspace = await workspacesModel.create(newWorkspace);
-    res.status(201).json({ message: "WorkspacesModel created successfully",workspace:createdWorkspace});
+    res.status(201).json({ 
+      success: true,
+      data: createdWorkspace,
+      message: "Workspace created successfully"
+    });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ 
+      success: false,
+      error: error.message,
+      message: error.message 
+    });
   }
 };
 
@@ -40,7 +75,11 @@ const updateWorkspaces = async (req, res) => {
   const updatedData = req.body;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ error: "Invalid Workspace ID" });
+    return res.status(400).json({ 
+      success: false,
+      error: "Invalid Workspace ID",
+      message: "Invalid Workspace ID" 
+    });
   }
 
   try {
@@ -51,15 +90,24 @@ const updateWorkspaces = async (req, res) => {
     );
 
     if (!updatedWorkspace) {
-      return res.status(404).json({ error: "Workspace not found" });
+      return res.status(404).json({ 
+        success: false,
+        error: "Workspace not found",
+        message: "Workspace not found" 
+      });
     }
 
     res.status(200).json({
-      message: "Workspace updated successfully",
-      workspace: updatedWorkspace,
+      success: true,
+      data: updatedWorkspace,
+      message: "Workspace updated successfully"
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ 
+      success: false,
+      error: error.message,
+      message: error.message 
+    });
   }
 };
 
@@ -69,7 +117,11 @@ const patchWorkspaces = async (req, res) => {
   const patchData = req.body;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ error: "Invalid Workspace ID" });
+    return res.status(400).json({ 
+      success: false,
+      error: "Invalid Workspace ID",
+      message: "Invalid Workspace ID" 
+    });
   }
 
   try {
@@ -80,15 +132,24 @@ const patchWorkspaces = async (req, res) => {
     );
 
     if (!patchedWorkspace) {
-      return res.status(404).json({ error: "Workspace not found" });
+      return res.status(404).json({ 
+        success: false,
+        error: "Workspace not found",
+        message: "Workspace not found" 
+      });
     }
 
     res.status(200).json({
-      message: "Workspace patched successfully",
-      workspace: patchedWorkspace,
+      success: true,
+      data: patchedWorkspace,
+      message: "Workspace patched successfully"
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ 
+      success: false,
+      error: error.message,
+      message: error.message 
+    });
   }
 };
 //DELETE
@@ -96,22 +157,35 @@ const deleteWorkspaces = async (req, res) => {
   const { id } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ error: "Invalid Workspace ID" });
+    return res.status(400).json({ 
+      success: false,
+      error: "Invalid Workspace ID",
+      message: "Invalid Workspace ID" 
+    });
   }
 
   try {
     const deletedWorkspace = await workspacesModel.findByIdAndDelete(id);
 
     if (!deletedWorkspace) {
-      return res.status(404).json({ error: "Workspace not found" });
+      return res.status(404).json({ 
+        success: false,
+        error: "Workspace not found",
+        message: "Workspace not found" 
+      });
     }
 
     res.status(200).json({
-      message: "Workspace deleted successfully",
-      workspace: deletedWorkspace,
+      success: true,
+      data: deletedWorkspace,
+      message: "Workspace deleted successfully"
     });
   } catch (error) {
-    res.status(500).json({ error: "Error deleting Workspace" });
+    res.status(500).json({ 
+      success: false,
+      error: "Error deleting Workspace",
+      message: error.message 
+    });
   }
 };
 

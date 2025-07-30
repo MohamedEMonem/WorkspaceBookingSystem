@@ -14,6 +14,7 @@ export class WorkspaceApiService {
    * Get all workspaces
    */
   getAllWorkspaces(params?: WorkspaceFilterParams): Observable<ApiResponse<Workspace[]>> {
+    console.log('getAllWorkspaces', params);
     return this.httpService.get<Workspace[]>(API_ENDPOINTS.WORKSPACES.GET_ALL, params);
   }
 
