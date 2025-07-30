@@ -9,7 +9,8 @@ export class AboutUsComponent implements OnInit {
 
   constructor() { }
 
-  ngOnInit() {
+  ngOnInit(): void {
+    // Component initialization logic can be added here
   }
 
 }
