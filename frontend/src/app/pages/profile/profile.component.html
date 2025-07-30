@@ -1,3 +1,137 @@
-<p>
-  profile works!
-</p>
+<div class="min-h-screen bg-gray-100 py-8">
+  <div class="max-w-4xl mx-auto px-4">
+    <!-- Profile Header -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <div class="flex items-center space-x-4">
+        <img src="assets/default-avatar.png" alt="Profile Picture" class="w-20 h-20 rounded-full">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800">{{ user?.name }}</h1>
+          <p class="text-gray-600">{{ user.email }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Information -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-xl font-semibold mb-4">Personal Information</h2>
+      <form class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Full Name</label>
+          <input type="text" name="name" 
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Email</label>
+          <input type="email"  name="email" 
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Phone Number</label>
+          <input type="tel"  name="phone" 
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Department</label>
+          <input type="text"  name="department" 
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        </div>
+
+        <div class="flex justify-end">
+          <button type="submit" 
+            class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Recent Bookings -->
+    <div class="bg-white rounded-lg shadow p-6 mt-6">
+      <h2 class="text-xl font-semibold mb-4">Recent Bookings</h2>
+      <div class="space-y-4">
+        <div *ngFor="let booking of recentBookings" class="border-b pb-4">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="font-medium">{{ booking.roomName }}</h3>
+              <p class="text-sm text-gray-600">{{ booking.date  }} - {{ booking.timeSlot }}</p>
+            </div>
+            <span >
+              {{ booking.status }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><div class="min-h-screen bg-gray-100 py-8">
+  <div class="max-w-4xl mx-auto px-4">
+    <!-- Profile Header -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <div class="flex items-center space-x-4">
+        <img src="assets/default-avatar.png" alt="Profile Picture" class="w-20 h-20 rounded-full">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800">{{ user?.name }}</h1>
+          <p class="text-gray-600">{{ user?.email }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Information -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-xl font-semibold mb-4">Personal Information</h2>
+      <form  class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Full Name</label>
+          <input type="text"  name="name" 
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Email</label>
+          <input type="email"  name="email" 
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Phone Number</label>
+          <input type="tel"  name="phone" 
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Department</label>
+          <input type="text"  name="department" 
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        </div>
+
+        <div class="flex justify-end">
+          <button type="submit" 
+            class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Recent Bookings -->
+    <div class="bg-white rounded-lg shadow p-6 mt-6">
+      <h2 class="text-xl font-semibold mb-4">Recent Bookings</h2>
+      <div class="space-y-4">
+        <div *ngFor="let booking of recentBookings" class="border-b pb-4">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="font-medium">{{ booking.roomName }}</h3>
+              <p class="text-sm text-gray-600">{{ booking.date }} - {{ booking.timeSlot }}</p>
+            </div>
+            <span >
+              {{ booking.status }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
