@@ -44,7 +44,7 @@ const updateWorkspaces = async (req, res) => {
   }
 
   try {
-    const updatedWorkspace = await WorkspacesModel.findByIdAndUpdate(
+    const updatedWorkspace = await workspacesModel.findByIdAndUpdate(
       id,
       updatedData,
       { new: true, runValidators: true }
@@ -73,7 +73,7 @@ const patchWorkspaces = async (req, res) => {
   }
 
   try {
-    const patchedWorkspace = await WorkspacesModel.findByIdAndUpdate(
+    const patchedWorkspace = await workspacesModel.findByIdAndUpdate(
       id,
       { $set: patchData },
       { new: true, runValidators: true }
@@ -100,7 +100,7 @@ const deleteWorkspaces = async (req, res) => {
   }
 
   try {
-    const deletedWorkspace = await WorkspacesModel.findByIdAndDelete(id);
+    const deletedWorkspace = await workspacesModel.findByIdAndDelete(id);
 
     if (!deletedWorkspace) {
       return res.status(404).json({ error: "Workspace not found" });
