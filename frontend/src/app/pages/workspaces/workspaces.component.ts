@@ -24,7 +24,7 @@ export class WorkspacesComponent implements OnInit {
 
     this.workspaceApiService.getAllWorkspaces().subscribe({
       next: (response) => {
-        console.log('response', response);
+        console.log('response 11111', response);
         this.workspaces = response.data || [];
         this.loading = false;
         console.log('Workspaces loaded:', this.workspaces);

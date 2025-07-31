@@ -112,6 +112,8 @@ export class UserApiService {
    * Store user data in localStorage
    */
   storeUserData(userData: LoginResponse): void {
+      console.log('Storing data in localStorage:', userData);
+
     localStorage.setItem(STORAGE_KEYS.USER_TOKEN, userData.token);
     localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(userData.user));
   }

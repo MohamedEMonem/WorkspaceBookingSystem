@@ -6,6 +6,7 @@ const {
 } = require("../utils/tokenUtils");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { date } = require("joi");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -441,14 +442,23 @@ const loginUser = async (req, res) => {
     );
 
     res.status(200).json({
+      data: {
       message: "User logged in successfully",
       token: token,
-      user: {
+      user : {
         id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
+        phone: user.phone,
+        gender: user.gender,
+        birthday: user.birthday,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        history: user.history || [],
+
       },
+    }
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
