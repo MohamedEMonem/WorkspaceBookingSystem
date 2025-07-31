@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError, BehaviorSubject } from 'rxjs';
-import { catchError, timeout, retry } from 'rxjs/operators';
+import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse, HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
+import { Observable, throwError, BehaviorSubject, of } from 'rxjs';
+import { catchError, timeout, retry, finalize, tap } from 'rxjs/operators';
 import { 
   BASE_URL, 
   REQUEST_TIMEOUT, 
@@ -20,24 +20,29 @@ export class HttpService {
   constructor(private http: HttpClient) {}
 
   /**
-   * Get request with authentication
+   * Get request with proper Angular patterns
    */
   get<T>(endpoint: string, params?: any): Observable<ApiResponse<T>> {
     this.setLoading(true);
     const url = this.buildUrl(endpoint);
     const httpParams = this.buildParams(params);
+    
     return this.http.get<ApiResponse<T>>(url, { 
       params: httpParams,
       headers: this.getHeaders()
     }).pipe(
       timeout(REQUEST_TIMEOUT),
       retry(1),
-      catchError(this.handleError.bind(this))
+      tap(() => this.setLoading(false)),
+      catchError((error: HttpErrorResponse) => {
+        this.setLoading(false);
+        return this.handleError(error);
+      })
     );
   }
 
   /**
-   * Post request with authentication
+   * Post request with proper Angular patterns
    */
   post<T>(endpoint: string, data: any): Observable<ApiResponse<T>> {
     this.setLoading(true);
@@ -47,12 +52,16 @@ export class HttpService {
       headers: this.getHeaders()
     }).pipe(
       timeout(REQUEST_TIMEOUT),
-      catchError(this.handleError.bind(this))
+      tap(() => this.setLoading(false)),
+      catchError((error: HttpErrorResponse) => {
+        this.setLoading(false);
+        return this.handleError(error);
+      })
     );
   }
 
   /**
-   * Put request with authentication
+   * Put request with proper Angular patterns
    */
   put<T>(endpoint: string, data: any): Observable<ApiResponse<T>> {
     this.setLoading(true);
@@ -62,12 +71,16 @@ export class HttpService {
       headers: this.getHeaders()
     }).pipe(
       timeout(REQUEST_TIMEOUT),
-      catchError(this.handleError.bind(this))
+      tap(() => this.setLoading(false)),
+      catchError((error: HttpErrorResponse) => {
+        this.setLoading(false);
+        return this.handleError(error);
+      })
     );
   }
 
   /**
-   * Patch request with authentication
+   * Patch request with proper Angular patterns
    */
   patch<T>(endpoint: string, data: any): Observable<ApiResponse<T>> {
     this.setLoading(true);
@@ -77,12 +90,16 @@ export class HttpService {
       headers: this.getHeaders()
     }).pipe(
       timeout(REQUEST_TIMEOUT),
-      catchError(this.handleError.bind(this))
+      tap(() => this.setLoading(false)),
+      catchError((error: HttpErrorResponse) => {
+        this.setLoading(false);
+        return this.handleError(error);
+      })
     );
   }
 
   /**
-   * Delete request with authentication
+   * Delete request with proper Angular patterns
    */
   delete<T>(endpoint: string): Observable<ApiResponse<T>> {
     this.setLoading(true);
@@ -92,28 +109,34 @@ export class HttpService {
       headers: this.getHeaders()
     }).pipe(
       timeout(REQUEST_TIMEOUT),
-      catchError(this.handleError.bind(this))
+      tap(() => this.setLoading(false)),
+      catchError((error: HttpErrorResponse) => {
+        this.setLoading(false);
+        return this.handleError(error);
+      })
     );
   }
 
-//   /**
-//    * Upload file with progress tracking
-//    */
-//   uploadFile<T>(endpoint: string, file: File, onProgress?: (progress: number) => void): Observable<ApiResponse<T>> {
-//     this.setLoading(true);
-//     const url = this.buildUrl(endpoint);
-//     const formData = new FormData();
-//     formData.append('file', file);
+  /**
+   * Upload file with proper Angular patterns
+   */
+  uploadFile<T>(endpoint: string, file: File): Observable<ApiResponse<T>> {
+    this.setLoading(true);
+    const url = this.buildUrl(endpoint);
+    const formData = new FormData();
+    formData.append('file', file);
 
-//     return this.http.post<ApiResponse<T>>(url, formData, {
-//       headers: this.getHeaders(true), // true for multipart/form-data
-//       reportProgress: true,
-//       observe: 'events'
-//     }).pipe(
-//       timeout(REQUEST_TIMEOUT),
-//       catchError(this.handleError.bind(this))
-//     ) as Observable<ApiResponse<T>>;
-//   }
+    return this.http.post<ApiResponse<T>>(url, formData, {
+      headers: this.getHeaders(true)
+    }).pipe(
+      timeout(REQUEST_TIMEOUT),
+      tap(() => this.setLoading(false)),
+      catchError((error: HttpErrorResponse) => {
+        this.setLoading(false);
+        return this.handleError(error);
+      })
+    );
+  }
 
   /**
    * Build full URL from endpoint
@@ -123,7 +146,7 @@ export class HttpService {
   }
 
   /**
-   * Build HTTP parameters
+   * Build HTTP parameters using Angular's HttpParams
    */
   private buildParams(params: any): HttpParams {
     let httpParams = new HttpParams();
@@ -140,7 +163,7 @@ export class HttpService {
   }
 
   /**
-   * Get headers with authentication token
+   * Get headers with authentication token using Angular's HttpHeaders
    */
   private getHeaders(isFormData: boolean = false): HttpHeaders {
     let headers = new HttpHeaders();
@@ -165,18 +188,16 @@ export class HttpService {
   }
 
   /**
-   * Set loading state
+   * Set loading state using Angular's BehaviorSubject
    */
   private setLoading(loading: boolean): void {
     this.loadingSubject.next(loading);
   }
 
   /**
-   * Handle HTTP errors
+   * Handle HTTP errors using Angular's error handling patterns
    */
   private handleError(error: HttpErrorResponse): Observable<never> {
-    this.setLoading(false);
-    
     let errorMessage = ERROR_MESSAGES.SERVER_ERROR;
 
     if (error.error instanceof ErrorEvent) {
@@ -193,7 +214,7 @@ export class HttpService {
           this.handleUnauthorized();
           break;
         case 403:
-          errorMessage = ERROR_MESSAGES.UNAUTHORIZED;
+          errorMessage = ERROR_MESSAGES.FORBIDDEN;
           break;
         case 404:
           errorMessage = ERROR_MESSAGES.NOT_FOUND;
