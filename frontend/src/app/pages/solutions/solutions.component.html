@@ -15,7 +15,7 @@
   </div>
 
   <!-- Loading State -->
-  @if (loading) {
+  @if (loading$ | async) {
     <div class="flex justify-center items-center py-12">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#009689]"></div>
       <span class="ml-3 text-gray-600">Loading solutions...</span>
@@ -23,7 +23,7 @@
   }
 
   <!-- Error State -->
-  @if (error && !loading) {
+  @if (error && !(loading$ | async)) {
     <div class="container mx-auto px-4 py-8">
       <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
         <div class="flex">
@@ -51,73 +51,81 @@
   }
 
   <!-- Solutions Content -->
-  @if (!loading && !error && solutionsStructure) {
+  @if (!(loading$ | async) && !(error && !(loading$ | async))) {
     <div class="container mx-auto px-4 py-12">
       
       <!-- Private Workspace Section -->
-      @if (solutionsStructure.privateWorkspace && solutionsStructure.privateWorkspace.length > 0) {
-        <div class="mb-16">
-          <div class="text-center mb-12">
-            <div class="inline-flex items-center px-4 py-2 bg-[#009689] text-white rounded-full text-sm font-medium mb-4">
-              Private Workspace
-            </div>
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">Private workspace</h2>
-            <p class="text-lg text-gray-600">Furnished offices for individuals and teams</p>
+      <div class="mb-16">
+        <div class="text-center mb-12">
+          <div class="inline-flex items-center px-4 py-2 bg-[#009689] text-white rounded-full text-sm font-medium mb-4">
+            Private Workspace
           </div>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                         @for (solution of solutionsStructure.privateWorkspace; track solution) {
-               <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                <div class="p-8">
-                  <div class="flex items-center mb-4">
-                                         <div class="w-12 h-12 bg-[#009689] rounded-full flex items-center justify-center mr-4 transition-transform duration-300 hover:scale-110">
-                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 class="text-xl font-semibold text-gray-900">{{ solution }}</h3>
-                      <p class="text-sm text-gray-500">Your own dedicated space</p>
-                    </div>
-                  </div>
-                  <p class="text-gray-600 mb-6">Get the privacy and focus you need with your own dedicated workspace.</p>
-                  <button class="w-full bg-[#009689] text-white py-3 px-6 rounded-lg font-medium hover:bg-[#007a6e] transition-colors">
-                    Learn More
-                  </button>
-                </div>
-              </div>
-            }
-          </div>
+          <h2 class="text-3xl font-bold text-gray-900 mb-4">Private workspace</h2>
+          <p class="text-lg text-gray-600">Furnished offices for individuals and teams</p>
         </div>
-      }
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          @for (workspaceType of getPrivateWorkspaceTypes(); track workspaceType.id) {
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <div class="p-8">
+                <div class="flex items-center mb-4">
+                  <div class="w-12 h-12 bg-[#009689] rounded-full flex items-center justify-center mr-4">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-xl font-semibold text-gray-900">{{ workspaceType.name }}</h3>
+                    <p class="text-sm text-gray-500">{{ workspaceType.capacity }}</p>
+                  </div>
+                </div>
+                <p class="text-gray-600 mb-6">{{ workspaceType.description }}</p>
+                <div class="space-y-3 mb-6">
+                  @for (feature of workspaceType.features; track $index) {
+                    <div class="flex items-center text-sm text-gray-600">
+                      <svg class="w-4 h-4 text-[#009689] mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      {{ feature }}
+                    </div>
+                  }
+                </div>
+                <button class="w-full bg-[#009689] text-white py-3 px-6 rounded-lg font-medium hover:bg-[#007a6e] transition-colors">
+                  Learn More
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
 
-      <!-- Coworking Access Section -->
-      @if (solutionsStructure.coworkingAccess && solutionsStructure.coworkingAccess.length > 0) {
+      <!-- Additional Solutions Section -->
+      @if (getAdditionalSolutions().length > 0) {
         <div class="mb-16">
           <div class="text-center mb-12">
             <div class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-medium mb-4">
-              Coworking Access
+              Additional Solutions
             </div>
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">Coworking access</h2>
-            <p class="text-lg text-gray-600">Shared workspace you access by the day or month</p>
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Additional solutions</h2>
+            <p class="text-lg text-gray-600">Spaces and services to elevate your work</p>
           </div>
           
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                         @for (solution of solutionsStructure.coworkingAccess; track solution) {
-               <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            @for (solution of getAdditionalSolutions(); track $index) {
+              <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                 <div class="p-8">
                   <div class="flex items-center mb-4">
-                                         <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mr-4 transition-transform duration-300 hover:scale-110">
+                    <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mr-4">
                       <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>
                     <div>
-                      <h3 class="text-xl font-semibold text-gray-900">{{ solution }}</h3>
-                      <p class="text-sm text-gray-500">Flexible shared workspace</p>
+                      <h3 class="text-xl font-semibold text-gray-900">{{ solution.name }}</h3>
+                      <p class="text-sm text-gray-500">Premium workspace services</p>
                     </div>
                   </div>
-                  <p class="text-gray-600 mb-6">Access shared workspaces with flexible membership options.</p>
+                  <p class="text-gray-600 mb-6">Enhance your workspace experience with premium services and amenities.</p>
                   <button class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors">
                     Learn More
                   </button>
@@ -128,42 +136,51 @@
         </div>
       }
 
-      <!-- Additional Solutions Section -->
-      @if (solutionsStructure.additionalSolutions && solutionsStructure.additionalSolutions.length > 0) {
-        <div class="mb-16">
-          <div class="text-center mb-12">
-            <div class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-full text-sm font-medium mb-4">
-              Additional Solutions
-            </div>
-            <h2 class="text-3xl font-bold text-gray-900 mb-4">Additional solutions</h2>
-            <p class="text-lg text-gray-600">Spaces and services to elevate your work</p>
-          </div>
-          
+      <!-- Available Workspaces Section -->
+      <div class="mb-16">
+        <h3 class="text-2xl font-bold text-gray-900 mb-8 text-center">Available Workspaces</h3>
+        
+        @if (availableWorkspaces.length > 0) {
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                         @for (solution of solutionsStructure.additionalSolutions; track solution) {
-               <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                <div class="p-8">
-                  <div class="flex items-center mb-4">
-                                         <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center mr-4 transition-transform duration-300 hover:scale-110">
-                      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            @for (workspace of availableWorkspaces; track workspace.id) {
+              <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div class="aspect-w-16 aspect-h-9 bg-gray-200">
+                  <img [src]="workspace.image" [alt]="workspace.name" class="w-full h-48 object-cover">
+                </div>
+                <div class="p-6">
+                  <div class="flex items-center justify-between mb-2">
+                    <h4 class="text-lg font-semibold text-gray-900">{{ workspace.name }}</h4>
+                    <div class="flex items-center">
+                      <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.293a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
-                    </div>
-                    <div>
-                      <h3 class="text-xl font-semibold text-gray-900">{{ solution }}</h3>
-                      <p class="text-sm text-gray-500">Premium workspace services</p>
+                      <span class="ml-1 text-sm text-gray-600">4.5</span>
                     </div>
                   </div>
-                  <p class="text-gray-600 mb-6">Enhance your workspace experience with premium services and amenities.</p>
-                  <button class="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-green-700 transition-colors">
-                    Learn More
-                  </button>
+                  <p class="text-gray-600 mb-3">{{ workspace.capacity }}</p>
+                  <p class="text-[#009689] font-semibold mb-4">{{ workspace.price }}</p>
+                  <div class="flex space-x-3">
+                    <button class="flex-1 bg-[#009689] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#007a6e] transition-colors">
+                      Book Now
+                    </button>
+                    <button class="flex-1 border border-[#009689] text-[#009689] py-2 px-4 rounded-lg font-medium hover:bg-[#009689] hover:text-white transition-colors">
+                      Learn More
+                    </button>
+                  </div>
                 </div>
               </div>
             }
           </div>
-        </div>
-      }
+        } @else {
+          <div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No workspaces available</h3>
+            <p class="mt-1 text-sm text-gray-500">Check back soon for new availability.</p>
+          </div>
+        }
+      </div>
 
       <!-- Call to Action Section -->
       <div class="bg-[#009689] rounded-2xl p-12 text-center text-white">
@@ -182,7 +199,7 @@
   }
 
   <!-- No Solutions Message -->
-  @if (!loading && !error && (!solutionsStructure || (solutionsStructure && !solutionsStructure.privateWorkspace && !solutionsStructure.coworkingAccess && !solutionsStructure.additionalSolutions))) {
+  @if (!(loading$ | async) && !(error && !(loading$ | async)) && (!solutionsStructure || (solutionsStructure && !solutionsStructure.privateWorkspace && !solutionsStructure.coworkingAccess && !solutionsStructure.additionalSolutions))) {
     <div class="container mx-auto px-4 py-12">
       <div class="text-center">
         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

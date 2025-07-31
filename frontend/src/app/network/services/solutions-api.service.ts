@@ -1,26 +1,32 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { HttpService } from '../http.service';
-import { API_ENDPOINTS, ApiResponse } from '../constants';
+import { BaseApiService } from './base-api.service';
+import { API_ENDPOINTS } from '../constants';
+
+export interface SolutionsStructure {
+  privateWorkspace?: string[];
+  additionalSolutions?: string[];
+  coworkingAccess?: string[];
+  [key: string]: string[] | undefined;
+}
 
 @Injectable({
   providedIn: 'root'
 })
-export class SolutionsApiService {
-  constructor(private httpService: HttpService) {}
-
+export class SolutionsApiService extends BaseApiService {
+  
   /**
-   * Get all solutions structure
+   * Get all solutions structure using Angular patterns
    */
-  getSolutionsStructure(): Observable<ApiResponse<any>> {
-    return this.httpService.get<any>(API_ENDPOINTS.SOLUTIONS.GET_ALL);
+  getSolutionsStructure(): Observable<SolutionsStructure> {
+    return this.get<SolutionsStructure>(API_ENDPOINTS.SOLUTIONS.GET_ALL);
   }
 
   /**
-   * Get workspaces by subsolution
+   * Get workspaces by subsolution using Angular patterns
    */
-  getWorkspacesBySubsolution(subsolution: string): Observable<ApiResponse<any>> {
+  getWorkspacesBySubsolution(subsolution: string): Observable<any[]> {
     const endpoint = API_ENDPOINTS.SOLUTIONS.GET_BY_SUBSOLUTION.replace(':subsolution', subsolution);
-    return this.httpService.get<any>(endpoint);
+    return this.get<any[]>(endpoint);
   }
 } 
