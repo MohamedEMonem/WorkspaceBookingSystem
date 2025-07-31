@@ -49,7 +49,7 @@ export class RegisterComponent implements OnInit {
   showPassword = false;
   showConfirmPassword = false;
   isLoading = false;
-  
+
   // Error states
   firstNameError = false;
   lastNameError = false;
@@ -84,7 +84,8 @@ export class RegisterComponent implements OnInit {
   }
 
   validatePhone(phone: string): boolean {
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+    // Egyptian phone numbers: 11 digits, start with 010, 011, 012, or 015
+    const phoneRegex = /^(010|011|012|015)\d{8}$/;
     return phoneRegex.test(phone.replace(/\s/g, ''));
   }
 
@@ -156,12 +157,12 @@ export class RegisterComponent implements OnInit {
 
     // Simulate registration process
     this.isLoading = true;
-    
+
     // Simulate API call
     setTimeout(() => {
       console.log('Registration attempt:', this.registerData);
       this.isLoading = false;
-      
+
       // Here you would typically make an API call to register the user
       // For now, we'll just log the data
       alert('Registration functionality would be implemented here!');
