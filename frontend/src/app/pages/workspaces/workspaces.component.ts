@@ -1,11 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { WorkspaceApiService } from '../../network/services/workspace-api.service';
 import { Workspace } from '../../models/workspaceModel';
+import { WorkspaceCard } from "../../components/workspace-card/workspace-card";
 
 @Component({
   selector: 'app-workspaces',
   templateUrl: './workspaces.component.html',
-  styleUrls: ['./workspaces.component.css']
+  styleUrls: ['./workspaces.component.css'],
+  imports: [WorkspaceCard]
 })
 export class WorkspacesComponent implements OnInit {
   workspaces: Workspace[] = [];
