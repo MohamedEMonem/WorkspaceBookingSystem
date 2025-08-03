@@ -3,7 +3,7 @@ export interface User {
   name: string;
   email: string;
   phone: string;
-  gender: 'male' | 'female' | 'other';
+  gender: 'male' | 'female';
   birthday?: Date;
   role: 'admin' | 'owner' | 'user';
   history?: any[];
@@ -17,10 +17,10 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
-  name: string;
   email: string;
+  name: string;
   phone: string;
-  gender: 'male' | 'female' | 'other';
+  gender: 'male' | 'female';
   birthday?: Date;
   role?: 'admin' | 'owner' | 'user';
   password: string;
@@ -31,7 +31,7 @@ export interface UpdateUserRequest {
   name?: string;
   email?: string;
   phone?: string;
-  gender?: 'male' | 'female' | 'other';
+  gender?: 'male' | 'female';
   birthday?: Date;
 }
 

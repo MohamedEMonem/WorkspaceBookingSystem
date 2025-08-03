@@ -15,8 +15,8 @@
           <h2 class="text-3xl font-bold sm:text-4xl">Find Your Perfect Workspace</h2>
 
           <p class="mt-4 text-gray-600">
-            Discover and book professional workspaces that inspire productivity. 
-            Whether you need a quiet desk, meeting room, or collaborative space, 
+            Discover and book professional workspaces that inspire productivity.
+            Whether you need a quiet desk, meeting room, or collaborative space,
             we've got you covered.
           </p>
 
@@ -77,7 +77,8 @@
     </div>
   </section>
 
-  <!-- CTA Section -->
+  <!-- CTA Section - Only show if user is not logged in -->
+  @if (!isLoggedIn()) {
   <section class="bg-teal-600">
     <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div class="flex flex-col items-center">
@@ -98,5 +99,6 @@
       </div>
     </div>
   </section>
+  }
 </main>
 
