@@ -25,7 +25,7 @@ function saltingString(str) {
 
 const createUser = async (req, res) => {
   try {
-    const { email, name, phone, gender, birthday, role, password, adminKey } =
+    const { email, name, phone, gender, birthday, role, password, adminKey, imgUrl } =
       req.body;
 
     // Check if user already exists
@@ -476,20 +476,7 @@ const getCurrentUser = async (req, res) => {
 
     res.status(200).json({
       message: "User authenticated successfully",
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        phone: user.phone,
-        gender: user.gender,
-        birthday: user.birthday,
-      },
-      authInfo: {
-        role: req.user.role,
-        userId: req.user.userId,
-        email: req.user.email,
-      },
+   user
     });
   } catch (error) {
     res

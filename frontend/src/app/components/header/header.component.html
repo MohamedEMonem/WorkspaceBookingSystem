@@ -112,13 +112,20 @@
           </div>
 
           <!-- Logout button -->
-          <button
-            *ngIf="isLoggedIn"
-            class="rounded-md bg-gray-100 px-5 py-2.5 text-sm font-medium text-teal-600"
-            (click)="logout()"
-          >
-            Logout
-          </button>
+          @if (isLoggedIn) {
+  <a href="/profile">
+    <img class="w-10 h-10 rounded-full" src="img1.jpg" alt="Profile" />
+  </a>
+
+  <button
+    class="rounded-md bg-gray-100 px-5 py-2.5 text-sm font-medium text-teal-600"
+    (click)="logout()"
+  >
+    Logout
+  </button>
+}
+
+          
         </div>
 
         <div class="block md:hidden">

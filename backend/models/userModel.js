@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 
 const usersSchema = mongoose.Schema({
+  imgUrl: {
+    type: String,
+    default: "https://res.cloudinary.com/dz3q7xj4f/image/upload/v1698851234/DefaultProfileImage.png",
+  },
   name: {
     type: String,
     minlength: [3, "Name of users must be at least 3 characters"],
