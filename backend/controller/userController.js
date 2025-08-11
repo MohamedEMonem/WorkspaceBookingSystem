@@ -476,7 +476,10 @@ const getCurrentUser = async (req, res) => {
 
     res.status(200).json({
       message: "User authenticated successfully",
-   user
+      data: {
+        user
+      }
+   
     });
   } catch (error) {
     res

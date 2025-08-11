@@ -13,16 +13,8 @@ import { ApiResponse } from '../../network/services';
 })
 export class ProfileComponent implements OnInit {
   automaticTimezone = true;
-  currentUser: ApiResponse<User> = {
-    data: {
-      name: '',
-      email: '',
-      phone: '',
-      gender: 'other',
-      role: 'user'
-    },
-    success: false
-  };
+  currentUser: User | undefined = {} as User; // Initialize with an empty User object
+  cuser: User | undefined = {} as User; // Initialize with an empty User object
   loading = true;
   error: string | null = null;
 
@@ -31,9 +23,11 @@ export class ProfileComponent implements OnInit {
   ngOnInit() {
     this.loading = true; // Ensure loading is true when starting
     this.userService.getCurrentUser().subscribe({
-      next: (response: ApiResponse<User>) => { // Changed type to ApiResponse<User>
+      next: (response) => { // Changed type to ApiResponse<User>
         console.log('API Response:', response); // Debug log
-        this.currentUser.data = response.data;
+        this.currentUser = response.data; // Assuming response.data is the User object
+        console.log('Current User:', this.currentUser);
+
         this.loading = false;
       },
       error: (err) => {
@@ -46,6 +40,7 @@ export class ProfileComponent implements OnInit {
       }
     });
   }
+  
 
   toggleAutomaticTimezone() {
     this.automaticTimezone = !this.automaticTimezone;
@@ -58,21 +53,21 @@ export class ProfileComponent implements OnInit {
   }
 
   // Add this method to your ProfileComponent class
-  retryLoading() {
-    this.loadUserProfile();
-  }
+  // retryLoading() {
+  //   this.loadUserProfile();
+  // }
 
-  private loadUserProfile() {
-    this.loading = true;
-    this.userService.getCurrentUser().subscribe({
-      next: (response: ApiResponse<User>) => {
-        this.currentUser.data = response.data;
-        this.loading = false;
-      },
-      error: (err) => {
-        this.error = 'Error loading user data';
-        this.loading = false;
-      }
-    });
-  }
+  // private loadUserProfile() {
+  //   this.loading = true;
+  //   this.userService.getCurrentUser().subscribe({
+  //     next: (response: ApiResponse<User>) => {
+  //       this.currentUser.data = response.data;
+  //       this.loading = false;
+  //     },
+  //     error: (err) => {
+  //       this.error = 'Error loading user data';
+  //       this.loading = false;
+  //     }
+  //   });
+  // }
 }
