@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { UserApiService } from '../../network/services/user-api.service';
 
 @Component({
   selector: 'app-home',
@@ -8,9 +9,13 @@ import { Component, OnInit } from '@angular/core';
 })
 export class HomeComponent implements OnInit {
 
-  constructor() { }
+  constructor(private userApiService: UserApiService) { }
 
   ngOnInit() {
+  }
+
+  isLoggedIn(): boolean {
+    return this.userApiService.isLoggedIn();
   }
 
 }
