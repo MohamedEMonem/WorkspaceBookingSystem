@@ -21,28 +21,7 @@ export class ProfileComponent implements OnInit {
   constructor(private userService: UserApiService) { }
 
   ngOnInit() {
-    this.loading = true; // Ensure loading is true when starting
-    this.userService.getCurrentUser().subscribe({
-      next: (response: ApiResponse<{ user: any }>) => {
-        console.log('API Response:', response); // Debug log
-        const dto = response.data?.user;
-        if (dto) {
-          this.currentUser = this.toUser(dto);
-          console.log('Current User:', this.currentUser);
-        } else {
-          this.error = 'No user data returned';
-        }
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Error details:', err); // Debug log
-        this.error = 'Error loading user data';
-        this.loading = false;
-      },
-      complete: () => {
-        this.loading = false; // Ensure loading is set to false when complete
-      }
-    });
+  this.loadUserProfile();
   }
 
 
@@ -74,6 +53,36 @@ export class ProfileComponent implements OnInit {
   //     }
   //   });
   // }
+
+  retryLoading() {
+    this.loadUserProfile();
+  }
+
+  private loadUserProfile() {
+    this.loading = true; // Ensure loading is true when starting
+    this.error = null;
+    this.userService.getCurrentUser().subscribe({
+      next: (response: ApiResponse<{ user: any }>) => {
+        console.log('API Response:', response); // Debug log
+        const dto = response.data?.user;
+        if (dto) {
+          this.currentUser = this.toUser(dto);
+          console.log('Current User:', this.currentUser);
+        } else {
+          this.error = 'No user data returned';
+        }
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error details:', err); // Debug log
+        this.error = 'Error loading user data';
+        this.loading = false;
+      },
+      complete: () => {
+        this.loading = false; // Ensure loading is set to false when complete
+      }
+    });
+  }
 
   private toUser(dto: any): User {
     return {
