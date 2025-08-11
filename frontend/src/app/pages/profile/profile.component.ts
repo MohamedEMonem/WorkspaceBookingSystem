@@ -23,11 +23,15 @@ export class ProfileComponent implements OnInit {
   ngOnInit() {
     this.loading = true; // Ensure loading is true when starting
     this.userService.getCurrentUser().subscribe({
-      next: (response) => { // Changed type to ApiResponse<User>
+      next: (response: ApiResponse<{ user: any }>) => {
         console.log('API Response:', response); // Debug log
-        this.currentUser = response.data; // Assuming response.data is the User object
-        console.log('Current User:', this.currentUser);
-
+        const dto = response.data?.user;
+        if (dto) {
+          this.currentUser = this.toUser(dto);
+          console.log('Current User:', this.currentUser);
+        } else {
+          this.error = 'No user data returned';
+        }
         this.loading = false;
       },
       error: (err) => {
@@ -40,7 +44,7 @@ export class ProfileComponent implements OnInit {
       }
     });
   }
-  
+
 
   toggleAutomaticTimezone() {
     this.automaticTimezone = !this.automaticTimezone;
@@ -70,4 +74,20 @@ export class ProfileComponent implements OnInit {
   //     }
   //   });
   // }
+
+  private toUser(dto: any): User {
+    return {
+      _id: dto._id ?? dto.id,
+      imgUrl: dto.imgUrl,
+      name: dto.name,
+      email: dto.email,
+      phone: dto.phone,
+      gender: dto.gender,
+      birthday: dto.birthday ? new Date(dto.birthday) : undefined,
+      role: dto.role,
+      history: dto.history,
+      createdAt: dto.createdAt ? new Date(dto.createdAt) : undefined,
+      updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : undefined,
+    } as User;
+  }
 }

@@ -27,8 +27,8 @@ export class UserApiService {
   /**
    * Get current user profile
    */
-  getCurrentUser(): Observable<ApiResponse<User>> {
-    return this.httpService.get<User>(API_ENDPOINTS.USERS.ME);
+  getCurrentUser(): Observable<ApiResponse<{ user: User }>> {
+    return this.httpService.get<{ user: User }>(API_ENDPOINTS.USERS.ME);
   }
 
   /**
