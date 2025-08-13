@@ -3,13 +3,15 @@ import { CommonModule } from '@angular/common';
 import { User } from '../../models/userModel';
 import { UserApiService } from '../../network/services/user-api.service';
 import { ApiResponse } from '../../network/services';
+import { ProfileHeader } from "../../components/profile-header/profile-header";
+import { Datepicker } from 'flowbite'; // take care
 
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css'],
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule, ProfileHeader]
 })
 export class ProfileComponent implements OnInit {
   automaticTimezone = true;
@@ -23,6 +25,10 @@ export class ProfileComponent implements OnInit {
   ngOnInit() {
   this.loadUserProfile();
   }
+  get avatarUrl(): string {
+  return this.currentUser?.imgUrl || 'default-avatar.jpg';
+}
+
 
 
   toggleAutomaticTimezone() {
@@ -30,33 +36,33 @@ export class ProfileComponent implements OnInit {
   }
 
   // Add methods for updating profile information
-  updateProfile(field: string) {
-    // Implement update logic here
-    console.log(`Updating ${field}`);
-  }
+   updateProfile(field: string) {
+    const newValue = prompt(`Enter new ${field}:`, this.currentUser?.[field as keyof typeof this.currentUser] as string);
 
+    if (newValue && this.currentUser?._id) {
+      // if(field === "birthday"){
+      //   // const datepicker = new Datepicker($datepickerEl, options, instanceOptions);//need attention
+
+      // }
+      this.userService.patchUser(this.currentUser._id, { [field]: newValue }).subscribe({
+        next: (updatedUser) => {
+          this.currentUser = this.toUser(updatedUser.data); // update local data
+        },
+        error: (err) => {
+          console.error(`Failed to update ${field}`, err);
+        }
+      });
+   
+    }
+
+  }
   // Add this method to your ProfileComponent class
   // retryLoading() {
   //   this.loadUserProfile();
   // }
 
-  // private loadUserProfile() {
-  //   this.loading = true;
-  //   this.userService.getCurrentUser().subscribe({
-  //     next: (response: ApiResponse<User>) => {
-  //       this.currentUser.data = response.data;
-  //       this.loading = false;
-  //     },
-  //     error: (err) => {
-  //       this.error = 'Error loading user data';
-  //       this.loading = false;
-  //     }
-  //   });
-  // }
 
-  retryLoading() {
-    this.loadUserProfile();
-  }
+
 
   private loadUserProfile() {
     this.loading = true; // Ensure loading is true when starting

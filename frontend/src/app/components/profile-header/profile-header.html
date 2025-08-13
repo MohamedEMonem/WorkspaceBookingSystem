@@ -1,0 +1,29 @@
+<section class="container mx-auto px-8 py-10">
+  <div class="border border-gray-300 rounded-2xl">
+    <!-- Header Image -->
+    <div class="h-60 rounded-lg overflow-hidden">
+      <img [src]="headerImage" alt="header"
+           (error)="setDefaultHeader($event)"
+           class="w-full h-full object-center">
+    </div>
+
+    <!-- Body -->
+    <div class="p-6">
+      <div class="flex lg:gap-0 gap-6 flex-wrap justify-between items-center">
+        <!-- Avatar & Name -->
+        <div class="flex items-center gap-3">
+          <img [src]="avatar || 'assets/img/default-avatar.jpg'" alt="avatar"
+               (error)="setDefaultAvatar($event)"
+               class="h-16 w-16 rounded-full object-cover ring-2 ring-teal-500">
+          <div>
+            <h2 class="text-xl font-semibold text-gray-900">{{ name }}</h2>
+            <p class="text-sm text-gray-500">{{ email }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bio -->
+      <p class="text-sm font-normal text-gray-600 mt-6">{{ bio }}</p>
+    </div>
+  </div>
+</section>
