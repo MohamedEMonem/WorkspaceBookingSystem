@@ -15,6 +15,7 @@ import { AuthService } from '../../network/services/auth.service';
 })
 export class HeaderComponent implements OnInit {
   isLoggedIn = false;
+  profileImage: string | null = null;
 
   constructor(private authService: AuthService, private router: Router) {
     // Check auth status on route changes
@@ -32,7 +33,14 @@ export class HeaderComponent implements OnInit {
     // Listen for storage events (in case token changes in another tab)
    this.authService.isLoggedIn$.subscribe(status => {
       this.isLoggedIn = status;
+      const userdata = localStorage.getItem(STORAGE_KEYS.USER_DATA);
+      if(userdata){
+        this.profileImage = JSON.parse(userdata).imageUrl || "default-avatar.jpg";
+      }
     });
+    
+
+
   }
 
 checkAuthStatus() {
@@ -42,6 +50,7 @@ checkAuthStatus() {
 
   logout() {
     localStorage.removeItem(STORAGE_KEYS.USER_TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.USER_DATA);
     this.isLoggedIn = false;
     this.authService.logout();
     this.router.navigate(['/']);

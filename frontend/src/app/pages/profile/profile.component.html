@@ -1,4 +1,4 @@
-<div class="mx-auto max-w-2xl px-4 py-10">
+<div class="mx-auto max-w-7xl px-4 py-2">
   <!-- Loading State -->
   <div *ngIf="loading" class="text-center p-4">
     <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
@@ -8,22 +8,32 @@
   <!-- Error State -->
   <div *ngIf="error" class="text-red-600 text-center p-4 bg-red-50 rounded">
     {{ error }}
-    <button (click)="retryLoading()" class="ml-4 px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700">
+    <!-- <button (click)="retryLoading()" class="ml-4 px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700">
       Retry
-    </button>
+    </button> -->
   </div>
 
   <!-- Minimal Profile Card -->
   <div *ngIf="!loading && !error" class="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-100">
-    <!-- Header with Avatar -->
-    <div class="px-6 py-6 flex items-center gap-4">
+
+    <!-- ========================================================= -->
+
+    <!-- <div class="px-6 py-6 flex items-center gap-4">
       <img [src]="currentUser?.imgUrl || 'img1.jpg'" alt="Avatar" class="h-16 w-16 rounded-full object-cover ring-2 ring-teal-500" />
       <div>
         <h2 class="text-xl font-semibold text-gray-900">{{ currentUser?.name || 'User' }}</h2>
         <p class="text-sm text-gray-500">{{ currentUser?.email }}</p>
       </div>
-    </div>
+    </div>  -->
 
+    <!-- ========================================================= -->
+
+    <app-profile-header [name]="currentUser?.name || 'User'" [email]="currentUser?.email || 'No email provided'"
+      [bio]="'Passionate UI/UX designer focused on creating intuitive and engaging digital experiences. Driven by design thinking, creativity, and a love for problem-solving.'"
+      [avatar]="avatarUrl" [headerImage]="'dark-image.jpg'">
+    </app-profile-header>
+
+    <!-- ========================================================= -->
     <!-- Details -->
     <div class="border-t border-gray-100">
       <dl class="divide-y divide-gray-100">
@@ -31,18 +41,28 @@
           <dt class="text-sm font-medium text-gray-500">Phone</dt>
           <dd class="col-span-2 text-sm text-gray-900 flex items-center justify-between">
             <span>{{ currentUser?.phone || '—' }}</span>
-            <button type="button" class="text-teal-600 hover:text-teal-500" (click)="updateProfile('phone')">Edit</button>
+            <button type="button" class="text-teal-600 hover:text-teal-500"
+              (click)="updateProfile('phone')">Edit</button>
+          </dd>
+        </div>
+
+        <div class="px-6 py-4 grid grid-cols-3 gap-4">
+          <dt class="text-sm font-medium text-gray-500 ">Birthday</dt>
+          <dd class="col-span-2 text-sm text-gray-900 flex items-center justify-between">
+
+            {{ currentUser?.birthday | date: 'mediumDate' }}
+            <div >
+              <input id="edit-birthday" type="text" class=" hidden">
+              
+              <button type="button" id="edit-birthday-button" class="text-teal-600 hover:text-teal-500"
+              (click)="updateProfile('birthday')">Edit</button>
+            </div>
           </dd>
         </div>
 
         <div class="px-6 py-4 grid grid-cols-3 gap-4">
           <dt class="text-sm font-medium text-gray-500">Role</dt>
           <dd class="col-span-2 text-sm text-gray-900 capitalize">{{ currentUser?.role }}</dd>
-        </div>
-
-        <div class="px-6 py-4 grid grid-cols-3 gap-4">
-          <dt class="text-sm font-medium text-gray-500">Birthday</dt>
-          <dd class="col-span-2 text-sm text-gray-900">{{ currentUser?.birthday | date: 'mediumDate' }}</dd>
         </div>
       </dl>
     </div>

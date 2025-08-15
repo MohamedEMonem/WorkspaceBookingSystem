@@ -363,7 +363,7 @@ const patchUser = async (req, res) => {
 
     res.status(200).json({
       message: "User patched successfully",
-      user: patchedUser,
+      data: patchedUser,
     });
   } catch (error) {
     res

@@ -43,13 +43,13 @@ export class LoginComponent implements OnInit {
   errorMessage = '';
 
   constructor(
-    private userApi: UserApiService ,
+    private userApi: UserApiService,
     private authService: AuthService,
     private router: Router
-  
-  ) {}
 
-  ngOnInit() {}
+  ) { }
+
+  ngOnInit() { }
 
   socialLogin(providerName: string) {
     alert(`${providerName} login would be implemented here!`);
@@ -80,20 +80,21 @@ export class LoginComponent implements OnInit {
     }
 
     this.isLoading = true;
-console.log('Login data:', this.loginData);
+    console.log('Login data:', this.loginData);
 
     this.userApi.login(this.loginData).subscribe({
       next: (response) => {
         console.log('Full login response:', response);
         // console.log('Response data:', response.token);
-console.log('Type of response:', response.data);
+        console.log('Type of response:', response.data);
         if (response && response.data && response.data.token) {
-          
+
           this.userApi.storeUserData(response.data);
           this.authService.login(response.data.token);
           this.router.navigate(['/workspaces']);
           // Verify storage immediately after
           console.log('Token after storage:', localStorage.getItem(STORAGE_KEYS.USER_TOKEN));
+          console.log('Token after storage:', localStorage.getItem(STORAGE_KEYS.USER_DATA));
         } else {
           this.errorMessage = 'Invalid response from server';
         }
