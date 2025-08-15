@@ -31,20 +31,44 @@ export class ProfileComponent implements OnInit {
 
 
 
+
   toggleAutomaticTimezone() {
     this.automaticTimezone = !this.automaticTimezone;
   }
 
   // Add methods for updating profile information
    updateProfile(field: string) {
-    const newValue = prompt(`Enter new ${field}:`, this.currentUser?.[field as keyof typeof this.currentUser] as string);
 
+if (field === 'birthday') {
+  const inputEl = document.getElementById('edit-birthday') as HTMLInputElement;
+  if (!inputEl) return;
+
+  const datepickerInstance = new Datepicker(inputEl, {
+    format: 'yyyy-mm-dd',
+    autohide: true,
+  });
+
+  inputEl.addEventListener('changeDate', () => {
+    const newValue = inputEl.value;
     if (newValue && this.currentUser?._id) {
-      // if(field === "birthday"){
-      //   // const datepicker = new Datepicker($datepickerEl, options, instanceOptions);//need attention
+      const dateValue = new Date(newValue); // Convert string → Date
 
-      // }
-      this.userService.patchUser(this.currentUser._id, { [field]: newValue }).subscribe({
+      this.userService.patchUser(this.currentUser._id, { birthday: dateValue }).subscribe({
+        next: (updatedUser) => {
+          this.currentUser = this.toUser(updatedUser.data);
+        },
+        error: (err) => console.error(`Failed to update ${field}`, err)
+      });
+    }
+  });
+
+  datepickerInstance.show();
+}
+
+else {
+      const newValue = prompt(`Enter new ${field}:`, this.currentUser?.[field as keyof typeof this.currentUser] as string);
+
+      this.userService.patchUser(this.currentUser!._id!, { [field]: newValue }).subscribe({
         next: (updatedUser) => {
           this.currentUser = this.toUser(updatedUser.data); // update local data
         },
@@ -54,8 +78,10 @@ export class ProfileComponent implements OnInit {
       });
    
     }
-
   }
+  
+
+
   // Add this method to your ProfileComponent class
   // retryLoading() {
   //   this.loadUserProfile();

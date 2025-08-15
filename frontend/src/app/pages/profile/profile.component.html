@@ -16,7 +16,7 @@
   <!-- Minimal Profile Card -->
   <div *ngIf="!loading && !error" class="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-100">
 
-<!-- ========================================================= -->
+    <!-- ========================================================= -->
 
     <!-- <div class="px-6 py-6 flex items-center gap-4">
       <img [src]="currentUser?.imgUrl || 'img1.jpg'" alt="Avatar" class="h-16 w-16 rounded-full object-cover ring-2 ring-teal-500" />
@@ -25,18 +25,15 @@
         <p class="text-sm text-gray-500">{{ currentUser?.email }}</p>
       </div>
     </div>  -->
-    
-<!-- ========================================================= -->
 
-<app-profile-header
-  [name]="currentUser?.name || 'User'"
-  [email]="currentUser?.email || 'No email provided'"
-  [bio]="'Passionate UI/UX designer focused on creating intuitive and engaging digital experiences. Driven by design thinking, creativity, and a love for problem-solving.'"
-[avatar]="avatarUrl"
-  [headerImage]="'dark-image.jpg'">
-</app-profile-header>
+    <!-- ========================================================= -->
 
-<!-- ========================================================= -->
+    <app-profile-header [name]="currentUser?.name || 'User'" [email]="currentUser?.email || 'No email provided'"
+      [bio]="'Passionate UI/UX designer focused on creating intuitive and engaging digital experiences. Driven by design thinking, creativity, and a love for problem-solving.'"
+      [avatar]="avatarUrl" [headerImage]="'dark-image.jpg'">
+    </app-profile-header>
+
+    <!-- ========================================================= -->
     <!-- Details -->
     <div class="border-t border-gray-100">
       <dl class="divide-y divide-gray-100">
@@ -44,17 +41,22 @@
           <dt class="text-sm font-medium text-gray-500">Phone</dt>
           <dd class="col-span-2 text-sm text-gray-900 flex items-center justify-between">
             <span>{{ currentUser?.phone || '—' }}</span>
-            <button type="button" class="text-teal-600 hover:text-teal-500" (click)="updateProfile('phone')">Edit</button>
+            <button type="button" class="text-teal-600 hover:text-teal-500"
+              (click)="updateProfile('phone')">Edit</button>
           </dd>
         </div>
-        
+
         <div class="px-6 py-4 grid grid-cols-3 gap-4">
-          <dt class="text-sm font-medium text-gray-500">Birthday</dt>
-                    <dd class="col-span-2 text-sm text-gray-900 flex items-center justify-between">
+          <dt class="text-sm font-medium text-gray-500 ">Birthday</dt>
+          <dd class="col-span-2 text-sm text-gray-900 flex items-center justify-between">
 
-          {{ currentUser?.birthday | date: 'mediumDate' }}
-                        <button type="button" class="text-teal-600 hover:text-teal-500" (click)="updateProfile('birthday')">Edit</button>
-
+            {{ currentUser?.birthday | date: 'mediumDate' }}
+            <div >
+              <input id="edit-birthday" type="text" class=" hidden">
+              
+              <button type="button" id="edit-birthday-button" class="text-teal-600 hover:text-teal-500"
+              (click)="updateProfile('birthday')">Edit</button>
+            </div>
           </dd>
         </div>
 
